@@ -28,7 +28,9 @@ frontend:
     baseDirectory: .next/standalone
     files:
       - '**/*'
-      - ../.next/static/**/*
+      # 必要なスタティックファイルとpublicファイルを含める
+      - '../static/**/*'
+      - '../public/**/*'
     discard-paths: no
   cache:
     paths:
