@@ -1,8 +1,8 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useAuthenticator } from '@aws-amplify/ui-react';
-import { AuthUser } from '@aws-amplify/auth';
+import {createContext, ReactNode, useContext, useEffect, useState} from 'react';
+import {useAuthenticator} from '@aws-amplify/ui-react';
+import {AuthUser} from '@aws-amplify/auth';
 
 export type UserType = 'user' | 'company';
 
@@ -33,8 +33,8 @@ const initialAuthContext: AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>(initialAuthContext);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-    const { authStatus, user } = useAuthenticator(context => [context.authStatus, context.user]);
+export function AuthProvider({children}: { children: ReactNode }) {
+    const {authStatus, user} = useAuthenticator(context => [context.authStatus, context.user]);
     const [authState, setAuthState] = useState<AuthContextType>(initialAuthContext);
 
     useEffect(() => {

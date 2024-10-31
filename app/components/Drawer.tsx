@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { X } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { useAuthContext } from '@/app/contexts/AuthContext';
+import {X} from 'lucide-react';
+import {useTranslation} from 'react-i18next';
+import {useAuthContext} from '@/app/contexts/AuthContext';
 import LanguageSwitcher from '@/app/components/LanguageSwitcher';
 
 interface DrawerProps {
@@ -12,9 +12,9 @@ interface DrawerProps {
     onClose: () => void;
 }
 
-const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
-    const { t } = useTranslation();
-    const { isAuthenticated } = useAuthContext();
+const Drawer: React.FC<DrawerProps> = ({isOpen, onClose}) => {
+    const {t} = useTranslation();
+    const {isAuthenticated} = useAuthContext();
 
     const clearStorageAndCookies = () => {
         // ローカルストレージをクリア
@@ -52,7 +52,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
             }`}
         >
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
+                <div className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}/>
                 <section className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
                     <div className="w-screen max-w-md">
                         <div className="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
@@ -64,7 +64,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                                         onClick={onClose}
                                     >
                                         <span className="sr-only">{t('menu.close')}</span>
-                                        <X className="h-6 w-6" />
+                                        <X className="h-6 w-6"/>
                                     </button>
                                 </div>
                                 <nav className="mt-6">
@@ -89,7 +89,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose }) => {
                                                 <label className="block text-sm font-medium text-gray-700">
                                                     Language
                                                 </label>
-                                                <LanguageSwitcher />
+                                                <LanguageSwitcher/>
                                             </div>
                                         </li>
                                     </ul>

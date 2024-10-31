@@ -1,7 +1,7 @@
 `use client`;
 
-import { Amplify } from 'aws-amplify';
-import { ResourcesConfig } from '@aws-amplify/core';
+import {Amplify} from 'aws-amplify';
+import {ResourcesConfig} from '@aws-amplify/core';
 
 export const configureAmplify = (userType: 'user' | 'company') => {
     const userPoolId = userType === 'user'

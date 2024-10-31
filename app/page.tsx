@@ -14,8 +14,8 @@ export default function Home(): ReactElement {
     };
 
     const router = useRouter();
-    const { isAuthenticated, isLoading } = useAuthContext();
-    const { t } = useTranslation();
+    const {isAuthenticated, isLoading} = useAuthContext();
+    const {t} = useTranslation();
     const signupUrl = process.env.NEXT_PUBLIC_SIGNUP_URL || 'https://www.yolo-japan.com/';
 
     useEffect(() => {

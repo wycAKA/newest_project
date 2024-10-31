@@ -3,13 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu } from 'lucide-react';
+import {Menu} from 'lucide-react';
 
 interface HeaderProps {
     toggleDrawer: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ toggleDrawer }) => {
+const Header: React.FC<HeaderProps> = ({toggleDrawer}) => {
     return (
         <header className="bg-white shadow-md">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({ toggleDrawer }) => {
                             onClick={toggleDrawer}
                             className="ml-4 p-2 rounded-md text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
                         >
-                            <Menu className="h-6 w-6" />
+                            <Menu className="h-6 w-6"/>
                         </button>
                     </div>
                 </div>
