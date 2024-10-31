@@ -25,12 +25,9 @@ frontend:
           EOF
         - npm run build
   artifacts:
-    baseDirectory: .next/standalone
+    baseDirectory: .next
     files:
       - '**/*'
-      # 必要なスタティックファイルとpublicファイルを含める
-      - '../static/**/*'
-      - '../public/**/*'
     discard-paths: no
   cache:
     paths:
