@@ -1,5 +1,3 @@
-`use client`;
-
 import {fetchFromApi} from './api';
 
 export interface Channel {
