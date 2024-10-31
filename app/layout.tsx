@@ -3,7 +3,7 @@ import {Inter} from "next/font/google";
 import '@aws-amplify/ui-react/styles.css'
 import '@/app/globals.css'
 import {I18nProvider} from '@/app/i18n'
-import ClientLayout from '@/app/clientLayout'
+import ClientLayout from '@/app/components/ClientLayout'
 
 const inter = Inter({
     subsets: ["latin", "latin-ext"],
