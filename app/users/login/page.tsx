@@ -1,7 +1,7 @@
 'use client'
 
 import {useTranslation} from 'react-i18next';
-import {ReactElement, useEffect, useState} from 'react';
+import {ReactElement, useEffect} from 'react';
 import {useRouter} from 'next/navigation';
 import {configureAmplify} from '@/app/utils/amplifyConfig';
 import {Authenticator, useAuthenticator} from '@aws-amplify/ui-react';
@@ -10,13 +10,16 @@ import Layout from "@/app/components/Layout";
 import Link from "next/link";
 import {fetchFromApi} from '@/app/utils/api';
 
-export const revalidate = 0;
-
-configureAmplify('user');
+export const dynamic = 'force-dynamic';
 
 function AuthenticatorWrapper({children}: { children: React.ReactNode }) {
     const router = useRouter();
     const {authStatus} = useAuthenticator((context) => [context.authStatus]);
+
+    useEffect(() => {
+        // Amplifyの設定をコンポーネント内で行う
+        configureAmplify('user');
+    }, []);
 
     useEffect(() => {
         if (authStatus === 'authenticated') {
@@ -29,7 +32,6 @@ function AuthenticatorWrapper({children}: { children: React.ReactNode }) {
 }
 
 export default function UserLoginPage(): ReactElement {
-    const [error] = useState<string | null>(null);
     const {t} = useTranslation();
 
     return (
@@ -59,11 +61,6 @@ export default function UserLoginPage(): ReactElement {
                             }}
                         />
                     </AuthenticatorWrapper>
-                    {error && (
-                        <p className="mt-2 text-center text-sm text-red-600">
-                            {error}
-                        </p>
-                    )}
                 </div>
             </div>
         </Layout>

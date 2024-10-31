@@ -6,30 +6,32 @@ frontend:
         - npm ci --cache .npm --prefer-offline
     build:
       commands:
-        - echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL" >> .env.production
-        - echo "NEXT_PUBLIC_API_KEY=$NEXT_PUBLIC_API_KEY" >> .env.production
-        - echo "NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID=$NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID" >> .env.production
-        - echo "NEXT_PUBLIC_COMPANY_POOL_DOMAIN=$NEXT_PUBLIC_COMPANY_POOL_DOMAIN" >> .env.production
-        - echo "NEXT_PUBLIC_COMPANY_POOL_ID=$NEXT_PUBLIC_COMPANY_POOL_ID" >> .env.production
-        - echo "NEXT_PUBLIC_DOMAIN=$NEXT_PUBLIC_DOMAIN" >> .env.production
-        - echo "NEXT_PUBLIC_REDIRECT_SIGNIN=$NEXT_PUBLIC_REDIRECT_SIGNIN" >> .env.production
-        - echo "NEXT_PUBLIC_REDIRECT_SIGNOUT=$NEXT_PUBLIC_REDIRECT_SIGNOUT" >> .env.production
-        - echo "NEXT_PUBLIC_REGION=$NEXT_PUBLIC_REGION" >> .env.production
-        - echo "NEXT_PUBLIC_SIGNUP_URL=$NEXT_PUBLIC_SIGNUP_URL" >> .env.production
-        - echo "NEXT_PUBLIC_USER_POOL_CLIENT_ID=$NEXT_PUBLIC_USER_POOL_CLIENT_ID" >> .env.production
-        - echo "NEXT_PUBLIC_USER_POOL_DOMAIN=$NEXT_PUBLIC_USER_POOL_DOMAIN" >> .env.production
-        - echo "NEXT_PUBLIC_USER_POOL_ID=$NEXT_PUBLIC_USER_POOL_ID" >> .env.production
-        - echo "NEXT_PUBLIC_WEBSOCKET_URL=$NEXT_PUBLIC_WEBSOCKET_URL" >> .env.production
+        - |
+          cat << EOF > .env.production
+          NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+          NEXT_PUBLIC_API_KEY=$NEXT_PUBLIC_API_KEY
+          NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID=$NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID
+          NEXT_PUBLIC_COMPANY_POOL_DOMAIN=$NEXT_PUBLIC_COMPANY_POOL_DOMAIN
+          NEXT_PUBLIC_COMPANY_POOL_ID=$NEXT_PUBLIC_COMPANY_POOL_ID
+          NEXT_PUBLIC_DOMAIN=$NEXT_PUBLIC_DOMAIN
+          NEXT_PUBLIC_REDIRECT_SIGNIN=$NEXT_PUBLIC_REDIRECT_SIGNIN
+          NEXT_PUBLIC_REDIRECT_SIGNOUT=$NEXT_PUBLIC_REDIRECT_SIGNOUT
+          NEXT_PUBLIC_REGION=$NEXT_PUBLIC_REGION
+          NEXT_PUBLIC_SIGNUP_URL=$NEXT_PUBLIC_SIGNUP_URL
+          NEXT_PUBLIC_USER_POOL_CLIENT_ID=$NEXT_PUBLIC_USER_POOL_CLIENT_ID
+          NEXT_PUBLIC_USER_POOL_DOMAIN=$NEXT_PUBLIC_USER_POOL_DOMAIN
+          NEXT_PUBLIC_USER_POOL_ID=$NEXT_PUBLIC_USER_POOL_ID
+          NEXT_PUBLIC_WEBSOCKET_URL=$NEXT_PUBLIC_WEBSOCKET_URL
+          EOF
         - npm run build
   artifacts:
-    # standaloneの場合
     baseDirectory: .next/standalone
     files:
       - '**/*'
       - ../.next/static/**/*
     discard-paths: no
-    cache:
-      paths:
-        - .next/cache/**/*
-        - .npm/**/*
-        - node_modules/**/*
+  cache:
+    paths:
+      - .next/cache/**/*
+      - .npm/**/*
+      - node_modules/**/*
