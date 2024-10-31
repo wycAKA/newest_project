@@ -1,0 +1,40 @@
+{
+  "top": {
+    "welcome": "YOLO JAPAN 채팅 앱",
+    "description": "YOLO JAPAN 채팅 앱에 오신 것을 환영합니다",
+    "userLogin": "YOLO JAPAN 계정으로 로그인",
+    "companyLogin": "기업 계정으로 로그인"
+  },
+  "menu": {
+    "menu": "메뉴",
+    "close": "닫기",
+    "home": "홈",
+    "login": "로그인",
+    "logout": "로그아웃"
+  },
+  "auth": {
+    "noAccount": "계정이 없으신가요?",
+    "signUp": "회원가입"
+  },
+  "error": {
+    "configuration": "설정 오류"
+  },
+  "variables": {
+    "checkEnvironment": "환경 변수를 확인해 주세요"
+  },
+  "chat": {
+    "talks": "대화",
+    "notChannel": "이용 가능한 채널이 없습니다",
+    "input": {
+      "placeholder": "메시지를 입력하세요...",
+      "send": "보내기"
+    },
+    "read": "읽음"
+  },
+  "translation": {
+    "language": "번역 언어"
+  },
+  "language": {
+    "select": "언어 선택"
+  }
+}

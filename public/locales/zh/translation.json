@@ -1,0 +1,40 @@
+{
+  "top": {
+    "welcome": "YOLO JAPAN 聊天应用",
+    "description": "欢迎使用 YOLO JAPAN 聊天应用",
+    "userLogin": "使用 YOLO JAPAN 帐户登录",
+    "companyLogin": "使用企业帐户登录"
+  },
+  "menu": {
+    "menu": "菜单",
+    "close": "关闭",
+    "home": "首页",
+    "login": "登录",
+    "logout": "退出登录"
+  },
+  "auth": {
+    "noAccount": "还没有帐户？",
+    "signUp": "注册"
+  },
+  "error": {
+    "configuration": "配置错误"
+  },
+  "variables": {
+    "checkEnvironment": "请检查您的环境变量"
+  },
+  "chat": {
+    "talks": "对话",
+    "notChannel": "暂无可用频道",
+    "input": {
+      "placeholder": "输入消息...",
+      "send": "发送"
+    },
+    "read": "已读"
+  },
+  "translation": {
+    "language": "翻译语言"
+  },
+  "language": {
+    "select": "选择语言"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "top": {
+    "welcome": "Aplicativo de Chat YOLO JAPAN",
+    "description": "Bem-vindo ao Aplicativo de Chat YOLO JAPAN",
+    "userLogin": "Entrar com Conta YOLO JAPAN",
+    "companyLogin": "Entrar com Conta Empresarial"
+  },
+  "menu": {
+    "menu": "Menu",
+    "close": "Fechar",
+    "home": "Início",
+    "login": "Entrar",
+    "logout": "Sair"
+  },
+  "auth": {
+    "noAccount": "Não tem uma conta?",
+    "signUp": "Cadastrar"
+  },
+  "error": {
+    "configuration": "Erro de Configuração"
+  },
+  "variables": {
+    "checkEnvironment": "Por favor, verifique suas variáveis de ambiente"
+  },
+  "chat": {
+    "talks": "Conversas",
+    "notChannel": "Nenhum canal disponível ainda",
+    "input": {
+      "placeholder": "Digite uma mensagem...",
+      "send": "Enviar"
+    },
+    "read": "Lido"
+  },
+  "translation": {
+    "language": "Idioma de Tradução"
+  },
+  "language": {
+    "select": "Selecionar Idioma"
+  }
+}

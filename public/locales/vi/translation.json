@@ -1,0 +1,40 @@
+{
+  "top": {
+    "welcome": "Ứng dụng Chat YOLO JAPAN",
+    "description": "Chào mừng đến với Ứng dụng Chat YOLO JAPAN",
+    "userLogin": "Đăng nhập bằng tài khoản YOLO JAPAN",
+    "companyLogin": "Đăng nhập bằng tài khoản Doanh nghiệp"
+  },
+  "menu": {
+    "menu": "Menu",
+    "close": "Đóng",
+    "home": "Trang chủ",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất"
+  },
+  "auth": {
+    "noAccount": "Chưa có tài khoản?",
+    "signUp": "Đăng ký"
+  },
+  "error": {
+    "configuration": "Lỗi cấu hình"
+  },
+  "variables": {
+    "checkEnvironment": "Vui lòng kiểm tra biến môi trường của bạn"
+  },
+  "chat": {
+    "talks": "Trò chuyện",
+    "notChannel": "Chưa có kênh chat nào",
+    "input": {
+      "placeholder": "Nhập tin nhắn...",
+      "send": "Gửi"
+    },
+    "read": "Đã xem"
+  },
+  "translation": {
+    "language": "Ngôn ngữ dịch"
+  },
+  "language": {
+    "select": "Chọn ngôn ngữ"
+  }
+}

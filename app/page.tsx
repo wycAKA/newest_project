@@ -1,52 +1,49 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
+import {useTranslation} from 'react-i18next';
+
 import "./../app/app.css";
-import { Amplify } from "aws-amplify";
+import {Amplify} from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(outputs);
 
-const client = generateClient<Schema>();
-
 export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+    const {t} = useTranslation();
 
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }
+    return (
+        <main>
+            <div className="w-full max-w-md space-y-8 px-4 py-6 sm:px-6 lg:px-8">
+                <div>
+                    <h2 className="text-center text-2xl font-extrabold text-gray-900 sm:text-3xl">
+                        {t('top.welcome')}
+                    </h2>
+                </div>
 
-  useEffect(() => {
-    listTodos();
-  }, []);
+                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <div className="space-y-6">
+                        <button
+                            className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            {t('top.userLogin')}
+                        </button>
+                        <button
+                            className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                            {t('top.companyLogin')}
+                        </button>
+                    </div>
+                </div>
 
-  function createTodo() {
-    client.models.Todo.create({
-      content: window.prompt("Todo content"),
-    });
-  }
-
-  return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/nextjs/start/quickstart/nextjs-app-router-client-components/">
-          Review next steps of this tutorial.
-        </a>
-      </div>
-    </main>
-  );
+                <div>
+                    <div className="mt-8 text-center">
+                        <p className="text-sm text-gray-600">
+                            {t('auth.noAccount')} <br/>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    );
 }
