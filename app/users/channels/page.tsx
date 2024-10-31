@@ -9,6 +9,8 @@ import Link from 'next/link';
 import {Loader2, MessageCircle} from 'lucide-react';
 import {useTranslation} from "react-i18next";
 
+export const revalidate = 0;
+
 // 時間表示のフォーマット関数
 const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);

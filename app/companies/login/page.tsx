@@ -10,6 +10,8 @@ import Layout from "@/app/components/Layout";
 import Link from "next/link";
 import {fetchFromApi} from "@/app/utils/api";
 
+export const revalidate = 0;
+
 configureAmplify('company');
 
 function AuthenticatorWrapper({children}: { children: React.ReactNode }) {
