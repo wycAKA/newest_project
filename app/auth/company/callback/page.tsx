@@ -30,6 +30,8 @@ export default function AuthCallback() {
                     return;
                 }
 
+                console.log("Starting sign in with redirect");
+
                 // 明示的にサインインプロセスを完了
                 await signInWithRedirect();
 
