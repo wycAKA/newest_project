@@ -26,11 +26,13 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
                 console.log("Existing session:", existingSession);
                 if (existingSession.tokens) {
                     console.log("existingSession.tokens is truthy");
-                    router.push('/');
+                    // router.push('/');
                     return;
                 }
 
+                console.log("Redirected to sign in...1");
                 await signInWithRedirect();
+                console.log("Redirected to sign in...2");
                 const authSession = await fetchAuthSession();
                 console.log("Auth session:", authSession);
 
@@ -38,7 +40,7 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
                     console.log("authSession.tokens is truthy");
                     await getCurrentUser();
                     await fetchFromApi('/companies', 'POST');
-                    router.push('/');
+                    // router.push('/');
                 }
 
                 console.log("Redirecting to sign in...");
