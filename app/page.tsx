@@ -35,14 +35,6 @@ export default function Home(): ReactElement {
 
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                     <div className="space-y-6">
-                        <Link href="/users/login"
-                              className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {t('top.userLogin')}
-                        </Link>
-                        <Link href="/companies/login"
-                              className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            {t('top.companyLogin')}
-                        </Link>
                         <button
                             onClick={() => handleLogin('user')}
                             className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
