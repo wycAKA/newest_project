@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ReactElement, useEffect } from "react";
 import { fetchFromApi } from "@/app/utils/api";
 import {configureAmplify} from "@/app/utils/amplifyConfig";
+import Layout from "@/app/components/Layout";
 
 export const dynamic = 'force-dynamic';
 
@@ -57,14 +58,16 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
 
 export default function AuthCallback(): ReactElement {
     return (
-        <CallbackWrapper>
-            <div className="w-full space-y-8 px-4 py-6 sm:px-6 lg:px-8">
-                <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Authenticating...
-                    </h2>
+        <Layout>
+            <CallbackWrapper>
+                <div className="w-full space-y-8 px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="sm:mx-auto sm:w-full sm:max-w-md">
+                        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                            Authenticating...
+                        </h2>
+                    </div>
                 </div>
-            </div>
-        </CallbackWrapper>
+            </CallbackWrapper>
+        </Layout>
     );
 }
