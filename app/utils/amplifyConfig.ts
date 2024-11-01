@@ -25,25 +25,22 @@ export const configureAmplify = (userType: 'user' | 'company') => {
         ? [process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT]
         : ['http://localhost:3000'];
 
-    const config: ResourcesConfig = {
-        Auth: {
-            Cognito: {
-                userPoolId: userPoolId,
-                userPoolClientId: userPoolClientId,
-                loginWith: {
-                    oauth: {
-                        domain: domain,
-                        scopes: ['openid', 'email', 'profile'],
-                        redirectSignIn: redirectSignIn,
-                        redirectSignOut: redirectSignOut,
-                        responseType: 'code'
-                    }
-                }
+    const config = {
+        ...{
+            aws_project_region: process.env.NEXT_PUBLIC_REGION,
+            aws_user_pools_id: userPoolId,
+            aws_user_pools_web_client_id: userPoolClientId,
+            oauth: {
+                domain: domain,
+                redirectSignIn: redirectSignIn,
+                redirectSignOut: redirectSignOut,
+                scope: ["email", "openid", "profile"],
+                responseType: "code"
             }
         }
-    };
+    } as ResourcesConfig;
 
-    Amplify.configure(config);
+    Amplify.configure(config, { ssr: true });
 };
 
 export const getLoginUrl = (userType: 'user' | 'company'): string => {
