@@ -57,8 +57,13 @@ export const getLoginUrl = (userType: 'user' | 'company'): string => {
         ? process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID
         : process.env.NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID;
 
+    const redirectUri = `${process.env.NEXT_PUBLIC_DOMAIN_URL}${
+        userType === 'user'
+            ? '/auth/user/callback'
+            : '/auth/company/callback'
+    }`;
+
     const region = process.env.NEXT_PUBLIC_REGION;
-    const redirectUri = encodeURIComponent(process.env.NEXT_PUBLIC_REDIRECT_SIGNIN || '');
 
     if (!domain || !clientId || !region) {
         throw new Error(`Missing Cognito configuration for ${userType} user type`);
