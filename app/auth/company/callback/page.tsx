@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {fetchFromApi} from "@/app/utils/api";
 
+export const dynamic = 'force-dynamic';
+
 export default function AuthCallback() {
     const router = useRouter();
 
