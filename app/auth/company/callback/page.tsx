@@ -27,7 +27,7 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
                     return;
                 }
 
-                await signInWithRedirect();
+                // await signInWithRedirect();
                 const authSession = await fetchAuthSession();
 
                 if (authSession.tokens) {
