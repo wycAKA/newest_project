@@ -14,7 +14,7 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         // Amplifyの設定をコンポーネント内で行う
-        configureAmplify('user');
+        configureAmplify('company');
     }, []);
 
     useEffect(() => {
@@ -31,7 +31,7 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
 
                 if (authSession.tokens) {
                     await getCurrentUser();
-                    await fetchFromApi('/users', 'POST');
+                    await fetchFromApi('/companies', 'POST');
                     router.push('/');
                 }
 
