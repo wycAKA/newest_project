@@ -34,6 +34,8 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
                     await fetchFromApi('/companies', 'POST');
                     router.push('/');
                 }
+
+                router.push('/');
             } catch (error) {
                 console.error("Authentication error:", error);
 
