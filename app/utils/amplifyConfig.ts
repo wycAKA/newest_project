@@ -18,13 +18,6 @@ export const configureAmplify = (userType: 'user' | 'company') => {
         throw new Error(`Missing Cognito configuration for ${userType} user type`);
     }
 
-    // リダイレクトURLを配列として定義
-    const redirectSignIn = [getAuthRedirectUrl(userType)];
-
-    const redirectSignOut = process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT
-        ? [process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT]
-        : ['http://localhost:3000'];
-
     const config = {
         ...{
             aws_project_region: process.env.NEXT_PUBLIC_REGION,
@@ -32,8 +25,8 @@ export const configureAmplify = (userType: 'user' | 'company') => {
             aws_user_pools_web_client_id: userPoolClientId,
             oauth: {
                 domain: domain,
-                redirectSignIn: redirectSignIn,
-                redirectSignOut: redirectSignOut,
+                redirectSignIn: getAuthRedirectUrl(userType),
+                redirectSignOut: process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT,
                 scope: ["email", "openid", "profile"],
                 responseType: "code"
             }
