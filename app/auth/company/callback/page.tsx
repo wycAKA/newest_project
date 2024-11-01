@@ -1,16 +1,21 @@
 "use client";
 
-import "@/lib/amplify/config";
 import { signInWithRedirect } from "@aws-amplify/auth";
 import { fetchAuthSession, getCurrentUser, signOut } from "aws-amplify/auth";
 import { useRouter } from "next/navigation";
 import { ReactElement, useEffect } from "react";
 import { fetchFromApi } from "@/app/utils/api";
+import {configureAmplify} from "@/app/utils/amplifyConfig";
 
 export const dynamic = 'force-dynamic';
 
 function CallbackWrapper({ children }: { children: React.ReactNode }) {
     const router = useRouter();
+
+    useEffect(() => {
+        // Amplifyの設定をコンポーネント内で行う
+        configureAmplify('company');
+    }, []);
 
     useEffect(() => {
         async function handleAuthCallback() {
