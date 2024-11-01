@@ -63,7 +63,7 @@ export const getLoginUrl = (userType: 'user' | 'company'): string => {
         throw new Error(`Missing Cognito configuration for ${userType} user type`);
     }
 
-    return `${domain}/?redirect_uri=${redirectUri}`;
+    return `https://${domain}/?redirect_uri=${redirectUri}`;
 };
 
 export const getLogoutUrl = (userType: 'user' | 'company'): string => {
@@ -82,7 +82,7 @@ export const getLogoutUrl = (userType: 'user' | 'company'): string => {
         throw new Error(`Missing Cognito configuration for ${userType} user type`);
     }
 
-    return `${domain}/logout?client_id=${clientId}&logout_uri=${signOutUri}`;
+    return `https://${domain}/logout?client_id=${clientId}&logout_uri=${signOutUri}`;
 };
 
 export function getAuthRedirectUrl(userType: 'user' | 'company'): string {
