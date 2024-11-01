@@ -19,9 +19,7 @@ export const configureAmplify = (userType: 'user' | 'company') => {
     }
 
     // リダイレクトURLを配列として定義
-    const redirectSignIn = process.env.NEXT_PUBLIC_REDIRECT_SIGNIN
-        ? [process.env.NEXT_PUBLIC_REDIRECT_SIGNIN]
-        : ['http://localhost:3000/auth/callback'];
+    const redirectSignIn = [getAuthRedirectUrl(userType)];
 
     const redirectSignOut = process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT
         ? [process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT]
@@ -57,11 +55,7 @@ export const getLoginUrl = (userType: 'user' | 'company'): string => {
         ? process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID
         : process.env.NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID;
 
-    const redirectUri = `${process.env.NEXT_PUBLIC_DOMAIN_URL}${
-        userType === 'user'
-            ? '/auth/user/callback'
-            : '/auth/company/callback'
-    }`;
+    const redirectUri = getAuthRedirectUrl(userType);
 
     const region = process.env.NEXT_PUBLIC_REGION;
 
@@ -90,3 +84,11 @@ export const getLogoutUrl = (userType: 'user' | 'company'): string => {
 
     return `${domain}/logout?client_id=${clientId}&logout_uri=${signOutUri}`;
 };
+
+export function getAuthRedirectUrl(userType: 'user' | 'company'): string {
+    return `${process.env.NEXT_PUBLIC_DOMAIN_URL}${
+        userType === 'user'
+            ? '/auth/user/callback'
+            : '/auth/company/callback'
+    }`;
+}
