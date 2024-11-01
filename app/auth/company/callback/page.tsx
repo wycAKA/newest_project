@@ -20,20 +20,28 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         async function handleAuthCallback() {
             try {
+                console.log("Handling auth callback...");
+
                 const existingSession = await fetchAuthSession();
+                console.log("Existing session:", existingSession);
                 if (existingSession.tokens) {
+                    console.log("existingSession.tokens is truthy");
                     router.push('/');
                     return;
                 }
 
                 await signInWithRedirect();
                 const authSession = await fetchAuthSession();
+                console.log("Auth session:", authSession);
 
                 if (authSession.tokens) {
+                    console.log("authSession.tokens is truthy");
                     await getCurrentUser();
                     await fetchFromApi('/companies', 'POST');
                     router.push('/');
                 }
+
+                console.log("Redirecting to sign in...");
             } catch (error) {
                 console.error("Authentication error:", error);
 
