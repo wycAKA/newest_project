@@ -37,9 +37,9 @@ export const configureAmplify = (userType: 'user' | 'company') => {
 };
 
 export const getLoginUrl = (userType: 'user' | 'company'): string => {
-    const domain = userType === 'user'
-        ? process.env.NEXT_PUBLIC_USER_POOL_DOMAIN
-        : process.env.NEXT_PUBLIC_COMPANY_POOL_DOMAIN;
+    const url = userType === 'user'
+        ? process.env.NEXT_PUBLIC_USER_POOL_SIGNIN_URL
+        : process.env.NEXT_PUBLIC_COMPANY_POOL_SIGNIN_URL;
 
     const clientId = userType === 'user'
         ? process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID
@@ -49,11 +49,11 @@ export const getLoginUrl = (userType: 'user' | 'company'): string => {
 
     const region = process.env.NEXT_PUBLIC_REGION;
 
-    if (!domain || !clientId || !region) {
+    if (!url || !clientId || !region) {
         throw new Error(`Missing Cognito configuration for ${userType} user type`);
     }
 
-    return `https://${domain}/?redirect_uri=${redirectUri}`;
+    return `${url}/?redirect_uri=${redirectUri}`;
 };
 
 export const getLogoutUrl = (userType: 'user' | 'company'): string => {
