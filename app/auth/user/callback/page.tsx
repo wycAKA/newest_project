@@ -18,7 +18,6 @@ function CallbackWrapper({children}: { children: React.ReactNode }) {
             try {
                 configureAmplify('user');
                 const existingSession = await fetchAuthSession();
-                console.log(existingSession);
 
                 if (!existingSession.tokens) {
                     deleteUserTypeCookie();
