@@ -38,9 +38,14 @@ export function AuthProvider({children}: { children: ReactNode }) {
     const [authState, setAuthState] = useState<AuthContextType>(initialAuthContext);
 
     useEffect(() => {
+        console.log('authStatus:', authStatus);
+        console.log('user:', user);
+
         if (authStatus !== undefined) {
             // userTypeの判定
             let userType: UserType | null = null;
+
+            console.log('userType:', userType);
 
             if (user) {
                 // 属性やトークンを使用してユーザータイプを判定
