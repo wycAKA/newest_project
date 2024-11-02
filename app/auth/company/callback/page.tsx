@@ -13,6 +13,11 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
+        // Amplifyの設定をコンポーネント内で行う
+        configureAmplify('company');
+    }, []);
+
+    useEffect(() => {
         async function handleAuthCallback() {
             try {
                 configureAmplify('company');

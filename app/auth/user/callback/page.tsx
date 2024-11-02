@@ -1,7 +1,6 @@
 "use client";
 
-import { signInWithRedirect } from "@aws-amplify/auth";
-import { fetchAuthSession, getCurrentUser, signOut } from "aws-amplify/auth";
+import { fetchAuthSession, signOut } from "aws-amplify/auth";
 import { useRouter } from "next/navigation";
 import { ReactElement, useEffect } from "react";
 import { fetchFromApi } from "@/app/utils/api";
@@ -21,23 +20,17 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         async function handleAuthCallback() {
             try {
+                configureAmplify('user');
                 const existingSession = await fetchAuthSession();
                 console.log(existingSession);
-                if (existingSession.tokens) {
-                    router.push('/');
+
+                if (!existingSession.tokens) {
+                    window.location.href = `${process.env.NEXT_PUBLIC_USER_POOL_SIGNIN_URL}/?redirect_uri=${process.env.NEXT_PUBLIC_DOMAIN_URL}/auth/user/callback`;
                     return;
                 }
 
-                await signInWithRedirect();
-                const authSession = await fetchAuthSession();
-
-                if (authSession.tokens) {
-                    await getCurrentUser();
-                    await fetchFromApi('/users', 'POST');
-                    router.push('/');
-                }
-
-                router.push('/');
+                await fetchFromApi('/users', 'POST');
+                router.push('/users/channels');
             } catch (error) {
                 console.error("Authentication error:", error);
 
