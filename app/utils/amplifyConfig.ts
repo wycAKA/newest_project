@@ -1,5 +1,3 @@
-'use client';
-
 import {Amplify} from "aws-amplify";
 import { ResourcesConfig } from '@aws-amplify/core';
 

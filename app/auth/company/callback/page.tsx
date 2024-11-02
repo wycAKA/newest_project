@@ -1,34 +1,31 @@
 "use client";
 
-import { fetchAuthSession, signOut } from "aws-amplify/auth";
-import { useRouter } from "next/navigation";
-import { ReactElement, useEffect } from "react";
-import { fetchFromApi } from "@/app/utils/api";
+import {fetchAuthSession, signOut} from "aws-amplify/auth";
+import {useRouter} from "next/navigation";
+import {ReactElement, useEffect} from "react";
+import {fetchFromApi} from "@/app/utils/api";
 import {configureAmplify, getAuthRedirectUrl} from "@/app/utils/amplifyConfig";
 import Layout from "@/app/components/Layout";
+import {deleteUserTypeCookie, updateUserTypeCookie} from "@/app/utils/cookieManager";
 
 export const dynamic = 'force-dynamic';
 
-function CallbackWrapper({ children }: { children: React.ReactNode }) {
+function CallbackWrapper({children}: { children: React.ReactNode }) {
     const router = useRouter();
-
-    useEffect(() => {
-        // Amplifyの設定をコンポーネント内で行う
-        configureAmplify('company');
-    }, []);
 
     useEffect(() => {
         async function handleAuthCallback() {
             try {
                 configureAmplify('company');
                 const existingSession = await fetchAuthSession();
-                console.log(existingSession);
 
                 if (!existingSession.tokens) {
+                    deleteUserTypeCookie();
                     window.location.href = `${process.env.NEXT_PUBLIC_COMPANY_POOL_SIGNIN_URL}/?redirect_uri=${getAuthRedirectUrl('company')}`;
                     return;
                 }
 
+                updateUserTypeCookie('company');
                 await fetchFromApi('/companies', 'POST');
                 router.push('/users/channels');
             } catch (error) {

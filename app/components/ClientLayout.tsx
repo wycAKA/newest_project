@@ -7,6 +7,7 @@ import {Authenticator} from '@aws-amplify/ui-react'
 import {AuthProvider} from '@/app/contexts/AuthContext'
 import {configureAmplify} from "@/app/utils/amplifyConfig"
 import {useEffect, useState} from 'react'
+import {getUserTypeFromCookie} from "@/app/utils/cookieManager";
 
 export default function ClientLayout({children}: { children: React.ReactNode }) {
     const [isConfigured, setIsConfigured] = useState(false)
@@ -14,7 +15,11 @@ export default function ClientLayout({children}: { children: React.ReactNode }) 
     useEffect(() => {
         const initialize = async () => {
             try {
-                // await configureAmplify('user')
+                const userType = getUserTypeFromCookie();
+
+                if (userType) {
+                    await configureAmplify('user')
+                }
                 setIsConfigured(true)
             } catch (error) {
                 console.error('Failed to configure Amplify:', error)
