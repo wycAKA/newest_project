@@ -1,7 +1,7 @@
-`use client`;
+'use client';
 
-import {Amplify} from 'aws-amplify';
-import {ResourcesConfig} from '@aws-amplify/core';
+import {Amplify} from "aws-amplify";
+import { ResourcesConfig } from '@aws-amplify/core';
 
 export const configureAmplify = (userType: 'user' | 'company') => {
     const userPoolId = userType === 'user'
@@ -10,69 +10,23 @@ export const configureAmplify = (userType: 'user' | 'company') => {
     const userPoolClientId = userType === 'user'
         ? process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID
         : process.env.NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID;
-    const domain = userType === 'user'
-        ? process.env.NEXT_PUBLIC_USER_POOL_DOMAIN
-        : process.env.NEXT_PUBLIC_COMPANY_POOL_DOMAIN;
 
-    if (!userPoolId || !userPoolClientId || !domain) {
-        throw new Error(`Missing Cognito configuration for ${userType} user type`);
+    if (!userPoolId || !userPoolClientId) {
+        throw new Error('User pool ID or client ID is not defined');
     }
 
-    const config = {
-        ...{
-            aws_project_region: process.env.NEXT_PUBLIC_REGION,
-            aws_user_pools_id: userPoolId,
-            aws_user_pools_web_client_id: userPoolClientId,
-            oauth: {
-                domain: domain,
-                redirectSignIn: getAuthRedirectUrl(userType),
-                redirectSignOut: process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT,
-                scope: ["email", "openid", "profile"],
-                responseType: "code"
-            }
-        }
-    } as ResourcesConfig;
+    // V6形式の設定
+    let config: ResourcesConfig = {
+        Auth: {
+            Cognito: {
+                userPoolId: userPoolId,
+                userPoolClientId: userPoolClientId,
+            },
+        },
+    };
 
+    // Amplifyの設定を適用
     Amplify.configure(config, { ssr: true });
-};
-
-export const getLoginUrl = (userType: 'user' | 'company'): string => {
-    const url = userType === 'user'
-        ? process.env.NEXT_PUBLIC_USER_POOL_SIGNIN_URL
-        : process.env.NEXT_PUBLIC_COMPANY_POOL_SIGNIN_URL;
-
-    const clientId = userType === 'user'
-        ? process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID
-        : process.env.NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID;
-
-    const redirectUri = getAuthRedirectUrl(userType);
-
-    const region = process.env.NEXT_PUBLIC_REGION;
-
-    if (!url || !clientId || !region) {
-        throw new Error(`Missing Cognito configuration for ${userType} user type`);
-    }
-
-    return `${url}/?redirect_uri=${redirectUri}`;
-};
-
-export const getLogoutUrl = (userType: 'user' | 'company'): string => {
-    const domain = userType === 'user'
-        ? process.env.NEXT_PUBLIC_USER_POOL_DOMAIN
-        : process.env.NEXT_PUBLIC_COMPANY_POOL_DOMAIN;
-
-    const clientId = userType === 'user'
-        ? process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID
-        : process.env.NEXT_PUBLIC_COMPANY_POOL_CLIENT_ID;
-
-    const region = process.env.NEXT_PUBLIC_REGION;
-    const signOutUri = encodeURIComponent(process.env.NEXT_PUBLIC_REDIRECT_SIGNOUT || '');
-
-    if (!domain || !clientId || !region) {
-        throw new Error(`Missing Cognito configuration for ${userType} user type`);
-    }
-
-    return `https://${domain}/logout?client_id=${clientId}&logout_uri=${signOutUri}`;
 };
 
 export function getAuthRedirectUrl(userType: 'user' | 'company'): string {

@@ -6,13 +6,8 @@ import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import Layout from "@/app/components/Layout";
 import {useAuthContext} from './contexts/AuthContext';
-import {getLoginUrl} from './utils/amplifyConfig';
 
 export default function Home(): ReactElement {
-    const handleLogin = (userType: 'user' | 'company') => {
-        window.location.href = getLoginUrl(userType);
-    };
-
     const router = useRouter();
     const {isAuthenticated, isLoading} = useAuthContext();
     const {t} = useTranslation();
@@ -23,6 +18,10 @@ export default function Home(): ReactElement {
             router.push('/users/channels');
         }
     }, [isAuthenticated, isLoading, router]);
+
+    const handleUserLogin = () => {
+        router.push('/auth/user/callback');
+    };
 
     const handleCompanyLogin = () => {
         router.push('/auth/company/callback');
@@ -40,7 +39,7 @@ export default function Home(): ReactElement {
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                     <div className="space-y-6">
                         <button
-                            onClick={() => handleLogin('user')}
+                            onClick={handleUserLogin}
                             className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             {t('top.userLogin')}

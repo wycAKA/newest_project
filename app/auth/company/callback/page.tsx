@@ -4,7 +4,7 @@ import { fetchAuthSession, signOut } from "aws-amplify/auth";
 import { useRouter } from "next/navigation";
 import { ReactElement, useEffect } from "react";
 import { fetchFromApi } from "@/app/utils/api";
-import {configureAmplify} from "@/app/utils/amplifyConfig";
+import {configureAmplify, getAuthRedirectUrl} from "@/app/utils/amplifyConfig";
 import Layout from "@/app/components/Layout";
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +25,7 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
                 console.log(existingSession);
 
                 if (!existingSession.tokens) {
-                    window.location.href = `${process.env.NEXT_PUBLIC_COMPANY_POOL_SIGNIN_URL}/?redirect_uri=${process.env.NEXT_PUBLIC_DOMAIN_URL}/auth/company/callback`;
+                    window.location.href = `${process.env.NEXT_PUBLIC_COMPANY_POOL_SIGNIN_URL}/?redirect_uri=${getAuthRedirectUrl('company')}`;
                     return;
                 }
 
