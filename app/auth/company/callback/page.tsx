@@ -25,7 +25,7 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
                 console.log(existingSession);
 
                 if (!existingSession.tokens) {
-                    window.location.href = `${process.env.NEXT_PUBLIC_COMPANY_POOL_SIGNIN_URL}/?redirect_uri=${getAuthRedirectUrl('user')}`;
+                    window.location.href = `${process.env.NEXT_PUBLIC_COMPANY_POOL_SIGNIN_URL}/?redirect_uri=${getAuthRedirectUrl('company')}`;
                     return;
                 }
 
