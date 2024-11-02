@@ -22,6 +22,7 @@ function CallbackWrapper({ children }: { children: React.ReactNode }) {
         async function handleAuthCallback() {
             try {
                 const existingSession = await fetchAuthSession();
+                console.log(existingSession);
                 if (existingSession.tokens) {
                     router.push('/');
                     return;
