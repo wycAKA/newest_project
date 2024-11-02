@@ -17,7 +17,7 @@ export function updateUserTypeCookie(userType: 'user' | 'company') {
 }
 
 export function extendUserTypeCookie() {
-    const currentUserType = Cookies.get(COOKIE_USER_TYPE);
+    const currentUserType = getUserTypeFromCookie();
     if (currentUserType) {
         updateUserTypeCookie(currentUserType as 'user' | 'company');
     }
@@ -28,4 +28,14 @@ export function deleteUserTypeCookie() {
         sameSite: 'strict',
         secure: true
     });
+}
+
+export function clearAllCookies() {
+    const allCookies = Cookies.get();
+    for (const cookieName in allCookies) {
+        Cookies.remove(cookieName, {
+            sameSite: 'strict',
+            secure: true
+        });
+    }
 }

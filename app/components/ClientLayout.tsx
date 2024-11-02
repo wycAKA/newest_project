@@ -1,12 +1,12 @@
 'use client'
 
-import '@aws-amplify/ui-react/styles.css'
-import '@/app/globals.css'
-import '@/app/i18n'
-import {Authenticator} from '@aws-amplify/ui-react'
-import {AuthProvider} from '@/app/contexts/AuthContext'
-import {configureAmplify} from "@/app/utils/amplifyConfig"
-import {useEffect, useState} from 'react'
+import '@aws-amplify/ui-react/styles.css';
+import '@/app/globals.css';
+import '@/app/i18n';
+import {Authenticator} from '@aws-amplify/ui-react';
+import {AuthProvider} from '@/app/contexts/AuthContext';
+import {configureAmplify} from "@/app/utils/amplifyConfig";
+import {useEffect, useState} from 'react';
 import {getUserTypeFromCookie} from "@/app/utils/cookieManager";
 
 export default function ClientLayout({children}: { children: React.ReactNode }) {
@@ -16,17 +16,19 @@ export default function ClientLayout({children}: { children: React.ReactNode }) 
         const initialize = async () => {
             try {
                 const userType = getUserTypeFromCookie();
+                console.log('ClientLayout:', userType);
+                console.log('userType:', userType);
 
                 if (userType) {
-                    await configureAmplify('user')
+                    await configureAmplify(userType);
                 }
-                setIsConfigured(true)
+                setIsConfigured(true);
             } catch (error) {
-                console.error('Failed to configure Amplify:', error)
+                console.error('Failed to configure Amplify:', error);
             }
         }
 
-        initialize()
+        initialize();
     }, [])
 
     // Amplifyの設定が完了するまでローディング状態を表示（オプション）
@@ -40,5 +42,5 @@ export default function ClientLayout({children}: { children: React.ReactNode }) 
                 {children}
             </AuthProvider>
         </Authenticator.Provider>
-    )
+    );
 }

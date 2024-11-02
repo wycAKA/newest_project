@@ -6,6 +6,7 @@ import {X} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {useAuthContext} from '@/app/contexts/AuthContext';
 import LanguageSwitcher from '@/app/components/LanguageSwitcher';
+import {clearAllCookies} from "@/app/utils/cookieManager";
 
 interface DrawerProps {
     isOpen: boolean;
@@ -17,20 +18,21 @@ const Drawer: React.FC<DrawerProps> = ({isOpen, onClose}) => {
     const {isAuthenticated} = useAuthContext();
 
     const clearStorageAndCookies = () => {
+        // 全てのクッキーをクリア
+        clearAllCookies();
         // ローカルストレージをクリア
         localStorage.clear();
-
-        // すべてのクッキーを削除
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i];
-            const eqPos = cookie.indexOf('=');
-            const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-            document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-        }
-
         // セッションストレージもクリア
         sessionStorage.clear();
+
+        // Service Workerが存在する場合は削除
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                for (const registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
     };
 
     const handleLogout = () => {
