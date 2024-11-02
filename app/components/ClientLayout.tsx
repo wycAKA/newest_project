@@ -7,7 +7,7 @@ import {Authenticator} from '@aws-amplify/ui-react';
 import {AuthProvider} from '@/app/contexts/AuthContext';
 import {configureAmplify} from "@/app/utils/amplifyConfig";
 import {useEffect, useState} from 'react';
-import {getUserTypeFromCookie, extendUserTypeCookie} from "@/app/utils/cookieManager";
+import {extendUserTypeCookie, getUserTypeFromCookie} from "@/app/utils/cookieManager";
 
 export default function ClientLayout({children}: { children: React.ReactNode }) {
     const [isConfigured, setIsConfigured] = useState(false)

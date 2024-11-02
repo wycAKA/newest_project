@@ -48,7 +48,7 @@ export function clearAllCookies() {
         const [name] = cookie.split('=').map(c => c.trim());
 
         // ルートパスで削除
-        Cookies.remove(name, { path: '/' });
+        Cookies.remove(name, {path: '/'});
 
         // ベースドメインで削除
         Cookies.remove(name, {

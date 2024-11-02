@@ -1,5 +1,5 @@
 import {Amplify} from "aws-amplify";
-import { ResourcesConfig } from '@aws-amplify/core';
+import {ResourcesConfig} from '@aws-amplify/core';
 
 export const configureAmplify = (userType: 'user' | 'company') => {
     const userPoolId = userType === 'user'
@@ -24,7 +24,7 @@ export const configureAmplify = (userType: 'user' | 'company') => {
     };
 
     // Amplifyの設定を適用
-    Amplify.configure(config, { ssr: true });
+    Amplify.configure(config, {ssr: true});
 };
 
 export function getAuthRedirectUrl(userType: 'user' | 'company'): string {

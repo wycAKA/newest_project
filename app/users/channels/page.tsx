@@ -1,10 +1,9 @@
 'use client'
 
-import {memo} from 'react';
+import {memo, useEffect, useMemo, useState} from 'react';
 import {useAuthenticator} from '@aws-amplify/ui-react';
 import {useRouter} from 'next/navigation';
-import {useEffect, useState, useMemo} from 'react';
-import {ChannelResponse, fetchUserChannels, Channel} from '@/app/utils/channelService';
+import {Channel, ChannelResponse, fetchUserChannels} from '@/app/utils/channelService';
 import Layout from "@/app/components/Layout";
 import Link from 'next/link';
 import {Loader2, MessageCircle} from 'lucide-react';
@@ -33,7 +32,7 @@ function ChannelList({channels}: { channels: ChannelResponse['channels'] }) {
                     href={`/users/messages/${channel.channelId}`}
                     className="block hover:bg-gray-50 active:bg-gray-100 transition-colors"
                 >
-                    <ChannelItem channel={channel} formatTime={formatTime} />
+                    <ChannelItem channel={channel} formatTime={formatTime}/>
                 </Link>
             ))}
         </div>
@@ -55,7 +54,7 @@ const UnreadBadge = memo(({count}: { count: number }) => {
 UnreadBadge.displayName = 'UnreadBadge';
 
 // ChannelItemコンポーネントを分離
-function ChannelItem({ channel, formatTime }: { channel: Channel, formatTime: (timestamp: string) => string }) {
+function ChannelItem({channel, formatTime}: { channel: Channel, formatTime: (timestamp: string) => string }) {
     return (
         <div className="flex items-start p-4 gap-3">
             <div className="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -135,7 +134,7 @@ export default function Channels() {
                     ) : error ? (
                         <div className="p-4 text-sm text-red-600">{error}</div>
                     ) : channelResponse?.channels.length ? (
-                        <ChannelList channels={channelResponse.channels} />
+                        <ChannelList channels={channelResponse.channels}/>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-64 px-4">
                             <MessageCircle className="h-12 w-12 text-gray-300 mb-2"/>
