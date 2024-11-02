@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "YOLO JAPAN - Chat App",
     description: "",
     icons: {
-        icon: '/favicon.ico',
+        icon: '/favicon.svg',
     },
 };
 

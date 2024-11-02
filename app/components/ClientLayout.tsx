@@ -14,7 +14,7 @@ export default function ClientLayout({children}: { children: React.ReactNode }) 
     useEffect(() => {
         const initialize = async () => {
             try {
-                await configureAmplify('user')
+                // await configureAmplify('user')
                 setIsConfigured(true)
             } catch (error) {
                 console.error('Failed to configure Amplify:', error)
