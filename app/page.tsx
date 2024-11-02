@@ -24,6 +24,10 @@ export default function Home(): ReactElement {
         }
     }, [isAuthenticated, isLoading, router]);
 
+    const handleCompanyLogin = () => {
+        router.push('/auth/company/callback');
+    };
+
     return (
         <Layout>
             <div className="w-full max-w-md space-y-8 px-4 py-6 sm:px-6 lg:px-8">
@@ -42,7 +46,7 @@ export default function Home(): ReactElement {
                             {t('top.userLogin')}
                         </button>
                         <button
-                            onClick={() => handleLogin('company')}
+                            onClick={handleCompanyLogin}
                             className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         >
                             {t('top.companyLogin')}
