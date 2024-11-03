@@ -1,6 +1,6 @@
 "use client";
 
-import {fetchAuthSession, getCurrentUser, signOut} from "aws-amplify/auth";
+import {fetchAuthSession, signOut} from "aws-amplify/auth";
 import {useRouter} from "next/navigation";
 import {ReactElement, useEffect} from "react";
 import {fetchFromApi} from "@/app/utils/api";
@@ -17,13 +17,9 @@ function CallbackWrapper({children}: { children: React.ReactNode }) {
         async function handleAuthCallback() {
             try {
                 configureAmplify('company');
-                // セッションとユーザー情報の確認
-                const [session, currentUser] = await Promise.all([
-                    fetchAuthSession(),
-                    getCurrentUser()
-                ]);
+                const existingSession = await fetchAuthSession();
 
-                if (!session.tokens || !currentUser) {
+                if (!existingSession.tokens) {
                     clearAllCookies();
                     window.location.href = `${process.env.NEXT_PUBLIC_COMPANY_POOL_SIGNIN_URL}/?redirect_uri=${getAuthRedirectUrl('company')}`;
                     return;

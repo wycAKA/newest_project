@@ -1,6 +1,6 @@
 "use client";
 
-import {fetchAuthSession, getCurrentUser, signOut} from "aws-amplify/auth";
+import {fetchAuthSession, signOut} from "aws-amplify/auth";
 import {useRouter} from "next/navigation";
 import {ReactElement, useEffect} from "react";
 import {fetchFromApi} from "@/app/utils/api";
@@ -16,23 +16,14 @@ function CallbackWrapper({children}: { children: React.ReactNode }) {
     useEffect(() => {
         async function handleAuthCallback() {
             try {
-                console.debug("Handling authentication callback...");
                 configureAmplify('user');
-                // セッションとユーザー情報の確認
-                const [session, currentUser] = await Promise.all([
-                    fetchAuthSession(),
-                    getCurrentUser()
-                ]);
-                console.debug("Session:", session);
+                const existingSession = await fetchAuthSession();
 
-                if (!session.tokens || !currentUser) {
-                    console.debug("No session or user found. Redirecting to sign-in page...");
+                if (!existingSession.tokens) {
                     clearAllCookies();
                     window.location.href = `${process.env.NEXT_PUBLIC_USER_POOL_SIGNIN_URL}/?redirect_uri=${getAuthRedirectUrl('user')}`;
                     return;
                 }
-
-                console.debug("User authenticated. Creating user profile...");
 
                 updateUserTypeCookie('user');
                 await fetchFromApi('/users', 'POST');
