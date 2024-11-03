@@ -3,6 +3,7 @@
 import React, {KeyboardEvent, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import TranslationLanguageSwitcher from '@/app/components/TranslationLanguageSwitcher';
+import {getUserTypeFromCookie} from "@/app/utils/cookieManager";
 
 interface Props {
     onSendMessage: (content: string) => void;
@@ -12,6 +13,7 @@ interface Props {
 const InputArea: React.FC<Props> = ({onSendMessage, connected}) => {
     const {t} = useTranslation();
     const [input, setInput] = useState('');
+    const userType = getUserTypeFromCookie();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,9 +55,11 @@ const InputArea: React.FC<Props> = ({onSendMessage, connected}) => {
                     {t('chat.input.send')}
                 </button>
             </div>
-            <div className="flex justify-end mt-2">
-                <TranslationLanguageSwitcher/>
-            </div>
+            {userType === 'user' && (
+                <div className="flex justify-end mt-2">
+                    <TranslationLanguageSwitcher/>
+                </div>
+            )}
         </form>
     );
 };
