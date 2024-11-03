@@ -1,12 +1,12 @@
 "use client";
 
-import {fetchAuthSession, signOut} from "aws-amplify/auth";
+import {fetchAuthSession, getCurrentUser, signOut} from "aws-amplify/auth";
 import {useRouter} from "next/navigation";
 import {ReactElement, useEffect} from "react";
 import {fetchFromApi} from "@/app/utils/api";
 import {configureAmplify, getAuthRedirectUrl} from "@/app/utils/amplifyConfig";
 import Layout from "@/app/components/Layout";
-import {deleteUserTypeCookie, updateUserTypeCookie} from "@/app/utils/cookieManager";
+import {clearAllCookies, updateUserTypeCookie} from "@/app/utils/cookieManager";
 
 export const dynamic = 'force-dynamic';
 
@@ -17,10 +17,14 @@ function CallbackWrapper({children}: { children: React.ReactNode }) {
         async function handleAuthCallback() {
             try {
                 configureAmplify('user');
-                const existingSession = await fetchAuthSession();
+                // セッションとユーザー情報の確認
+                const [session, currentUser] = await Promise.all([
+                    fetchAuthSession(),
+                    getCurrentUser()
+                ]);
 
-                if (!existingSession.tokens) {
-                    deleteUserTypeCookie();
+                if (!session.tokens || !currentUser) {
+                    clearAllCookies();
                     window.location.href = `${process.env.NEXT_PUBLIC_USER_POOL_SIGNIN_URL}/?redirect_uri=${getAuthRedirectUrl('user')}`;
                     return;
                 }
