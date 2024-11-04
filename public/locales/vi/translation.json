@@ -27,7 +27,8 @@
     "notChannel": "Chưa có kênh chat nào",
     "input": {
       "placeholder": "Nhập tin nhắn...",
-      "send": "Gửi"
+      "send": "Gửi",
+      "sending": "Đang gửi..."
     },
     "read": "Đã xem"
   },

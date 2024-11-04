@@ -27,7 +27,8 @@
     "notChannel": "Nenhum canal disponível ainda",
     "input": {
       "placeholder": "Digite uma mensagem...",
-      "send": "Enviar"
+      "send": "Enviar",
+      "sending": "Enviando..."
     },
     "read": "Lido"
   },

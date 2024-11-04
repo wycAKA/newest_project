@@ -27,7 +27,8 @@
     "notChannel": "No channels available yet",
     "input": {
       "placeholder": "Type a message...",
-      "send": "Send"
+      "send": "Send",
+      "sending": "Sending..."
     },
     "read": "Read"
   },

@@ -27,7 +27,8 @@
     "notChannel": "이용 가능한 채널이 없습니다",
     "input": {
       "placeholder": "메시지를 입력하세요...",
-      "send": "보내기"
+      "send": "보내기",
+      "sending": "전송 중..."
     },
     "read": "읽음"
   },

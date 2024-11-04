@@ -27,7 +27,8 @@
     "notChannel": "暂无可用频道",
     "input": {
       "placeholder": "输入消息...",
-      "send": "发送"
+      "send": "发送",
+      "sending": "发送中..."
     },
     "read": "已读"
   },
