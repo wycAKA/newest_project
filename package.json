@@ -1,5 +1,5 @@
 {
-  "name": "aws-amplify-gen2",
+  "name": "pocketty",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.5.5",
+    "amplify": "^0.0.11",
     "aws-amplify": "^6.6.6",
     "next": "14.2.10",
     "react": "^18",
