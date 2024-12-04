@@ -23,11 +23,15 @@ const Chat = () => {
     try {
       const res = await axios.post("/api/chatgpt", { prompt }, { timeout: 15000 });
       setAnswer(res.data.text);
-    } catch (e: any) {
-      if (e.code === "ECONNABORTED") {
-        setError("タイムアウト: 15秒以内に回答が返ってきませんでした。");
+    } catch (e: unknown) { // unknown型を使用
+      if (axios.isAxiosError(e)) { // axiosエラーを型安全にチェック
+        if (e.code === "ECONNABORTED") {
+          setError("タイムアウト: 15秒以内に回答が返ってきませんでした。");
+        } else {
+          setError("エラーが発生しました。");
+        }
       } else {
-        setError("エラーが発生しました。");
+        setError("予期しないエラーが発生しました。");
       }
     } finally {
       setIsLoading(false);
@@ -42,8 +46,10 @@ const Chat = () => {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: "image/*", // 画像ファイルのみを受け入れる
-    multiple: true, // 複数のファイルをアップロード可能にする
+    accept: {
+      'image/*': [], // 画像ファイルのみを許可
+    },
+    multiple: true, // 複数ファイルを許可
   });
 
   return (
