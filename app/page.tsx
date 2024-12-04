@@ -9,6 +9,11 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [isImageUploaded, setIsImageUploaded] = useState(false); // 画像が登録されたか
+  const [isFirstQuestion, setIsFirstQuestion] = useState(true); // 初回かどうか
+  const [history, setHistory] = useState<Record<string, string[]>>({});
+  const [activeChat, setActiveChat] = useState("");
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
 
   // 画像を削除する関数
   const removeImage = (index: number) => {
