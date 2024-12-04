@@ -15,7 +15,7 @@ const Chat = () => {
     const updatedImages = uploadedImages.filter((_, i) => i !== index);
     setUploadedImages(updatedImages);
 
-    if (updateupdatedImages.length === 0) {
+    if (updatedImages.length === 0) {
       setIsImageUploaded(false); // 再度アップロード可能に
     }
   };
