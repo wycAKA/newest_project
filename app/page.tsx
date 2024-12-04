@@ -14,8 +14,25 @@ const Chat = () => {
   const removeImage = (index: number) => {
     const updatedImages = uploadedImages.filter((_, i) => i !== index);
     setUploadedImages(updatedImages);
+
+    if (updateupdatedImages.length === 0) {
+      setIsImageUploaded(false); // 再度アップロード可能に
+    }
   };
 
+  //新しいチャット作成
+  const createNewChat = () => {
+    setPrompt("");
+    setAnswer("");
+    setError("");
+    setUploadedImages([]);
+    setIsImageUploaded(false);
+    setIsFirstQuestion(true); // 初回に戻す
+    setActiveChat("");
+  };
+
+  
+  //回答生成
   const generateAnswer = async () => {
     setIsLoading(true);
     setError("");
@@ -23,6 +40,18 @@ const Chat = () => {
     try {
       const res = await axios.post("/api/chatgpt", { prompt }, { timeout: 15000 });
       setAnswer(res.data.text);
+      //追加
+      const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+      setHistory((prevHistory) => {
+        const updatedMonthHistory = prevHistory[currentMonth] || [];
+        return {
+          ...prevHistory,
+          [currentMonth]: [...updatedMonthHistory, res.data.text],
+        };
+      });
+
+      setActiveChat(res.data.text);
+      setIsFirstQuestion(false); // 初回終了
     } catch (e: unknown) { // unknown型を使用
       if (axios.isAxiosError(e)) { // axiosエラーを型安全にチェック
         if (e.code === "ECONNABORTED") {
@@ -38,59 +67,110 @@ const Chat = () => {
     }
   };
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      setUploadedImages([...uploadedImages, ...acceptedFiles]);
-    }
-  }, [uploadedImages]);
+  // ドロップゾーンの設定
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        const newImages = [...uploadedImages, ...acceptedFiles];
+        setUploadedImages(newImages);
+
+        if (newImages.length >= 3) {
+          setIsImageUploaded(true); // 画像が3枚登録された
+        }
+      }
+    },
+    [uploadedImages]
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {
       'image/*': [], // 画像ファイルのみを許可
     },
-    multiple: true, // 複数ファイルを許可
+    maxFiles: 3,
+    disabled: isImageUploaded, // 画像がアップロード済みなら無効化
   });
 
   return (
-    <div className="min-h-screen bg-white"> {/* ページ全体を白背景に */}
-      <div className="mt-24 mx-auto my-16 min-w-1/2 max-w-2xl px-4 py-4 bg-white"> {/* 中央のコンテンツも白背景 */}
-        <div className="bg-gray-700 rounded-md md:flex md:items-center md:justify-between py-2 px-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-2xl font-bold leading-7 text-white">Art Info</h2>
-          </div>
-        </div>
+    <div className="flex flex-col min-h-screen bg-white">
+      {/* ヘッダー */}
+      <div className="flex justify-between items-center px-4 py-2 bg-gray-800 text-white">
+        <button
+          onClick={() => setIsHistoryVisible(!isHistoryVisible)}
+          className="text-xl font-bold"
+        >
+          <img
+            src="/menuicon.png"
+            alt="menu"
+            className="h-6 w-6 max-h-6 max-w-6"
+          />
+        </button>
+        <h1 className="text-lg font-semibold">Art Info</h1>
+        <button onClick={createNewChat}>
+          <img
+            src="/chaticon.png"
+            alt="new chat"
+            className="h-8 w-8 object-contain"
+          />
+        </button>
+      </div>
 
-        {/* チャット入力欄 */}
-        <div className="px-4 py-8">
-          <div className="relative">
-            <textarea
-              id="question"
-              className="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              placeholder="質問したいことを入力してください"
-              maxLength={500}
-              rows={5}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-            />
+      <div className="flex flex-1">
+        {isHistoryVisible && (
+          <div className="w-1/2 bg-gray-100 p-4 overflow-y-auto">
+            <h2 className="text-ms font-bold">会話履歴</h2>
+            {Object.keys(history).map((month) => (
+              <div key={month} className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-600">{month}</h3>
+                <ul>
+                  {history[month].map((title, index) => (
+                    <li
+                      key={index}
+                      onClick={() => setActiveChat(title)}
+                      className={`cursor-pointer py-1 px-2 ${
+                        activeChat === title ? "bg-indigo-100" : ""
+                      } hover:bg-indigo-50`}
+                    >
+                      {title}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          
-          {/* アップロードされた画像のプレビューをテキストエリアの下に表示 */}
-          <div className="mt-4 max-h-32 overflow-y-auto"> {/* 画像のプレビューエリアをスクロール可能に */}
+        )}
+
+        <div className={isHistoryVisible ? "w-3/4" : "w-full"}>
+          <div className="p-4">
+            {/* ドラッグアンドドロップエリア */}
+            <div
+              {...getRootProps()}
+              className={`p-4 border-dashed border-2 rounded-md text-center mb-4 ${
+                isImageUploaded ? "bg-gray-200 text-gray-400 cursor-not-allowed" : ""
+              }`}
+            >
+              <input {...getInputProps()} />
+              {isImageUploaded ? (
+                <p className="text-ms">画像は最大3枚までアップロードされています</p>
+              ) : (
+                <p className="text-ms">画像をドラッグ＆ドロップするか<br />クリックして選択してください<br />（最大3枚まで）</p>
+              )}
+            </div>
+
+            {/* アップロードされた画像のプレビュー */}
             {uploadedImages.length > 0 && (
-              <div className="pt-4 flex flex-wrap">
+              <div className="py-4 flex flex-wrap gap-4">
                 {uploadedImages.map((file, index) => (
-                  <div key={index} className="p-1 relative mx-2">
+                  <div key={index} className="p-1 relative">
                     <img
                       src={URL.createObjectURL(file)}
                       alt={`Uploaded ${index}`}
-                      className="h-16 w-16 rounded-md shadow"
+                      className="h-20 w-20 object-cover rounded-md shadow"
                     />
-                    {/* 画像を削除するボタン */}
                     <button
-                      onClick={() => removeImage(index)} // 削除するための関数を呼び出す
+                      onClick={() => removeImage(index)}
                       className="absolute top-0 right-0 text-black bg-gray-500/20 rounded-full h-6 w-6 flex items-center justify-center shadow"
-                      style={{ transform: "translate(50%, -50%)" }} // 右上の少し外に配置
+                      style={{ transform: "translate(50%, -50%)" }}
                     >
                       ×
                     </button>
@@ -98,45 +178,36 @@ const Chat = () => {
                 ))}
               </div>
             )}
+
+            {/* チャット入力と回答 */}
+            <div className="flex flex-col">
+              <textarea
+                className="w-full border rounded p-2 mb-4"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                rows={4}
+                placeholder="質問を入力してください"
+                disabled={isFirstQuestion} // 初回は入力不可
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={generateAnswer}
+                  disabled={isFirstQuestion ? uploadedImages.length === 0 : !prompt} // 初回は画像のみでOK、以降はテキスト必須
+                  className="bg-indigo-600 text-white px-4 py-2 rounded"
+                >
+                  質問する
+                </button>
+              </div>
+            </div>
+            {isLoading && <p>読み込み中...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {answer && <p className="mt-4">{answer}</p>}
           </div>
         </div>
-
-        <div className="px-4">
-          {/* ドラッグアンドドロップエリア */}
-          <div {...getRootProps()} className="p-4 border-dashed border-2 border-gray-300 rounded-md text-center mb-4">
-            <input {...getInputProps()} />
-            <p className="text-gray-600">画像をドラッグ＆ドロップするか、クリックして選択してください（複数選択可）</p>
-          </div>
-        </div>
-
-        {/* 送信ボタン */}
-        <div className="flex justify-end mt-4">
-          <button
-            className="rounded-md bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            disabled={isLoading || prompt.length === 0}
-            onClick={generateAnswer}
-          >
-            質問する
-          </button>
-        </div>
-
-        {/* エラーや回答の表示 */}
-        {isLoading ? (
-          <div className="font-medium leading-6 text-lg text-indigo-700 pb-2">読み込み中...</div>
-        ) : (
-          <>
-            {error && <div className="mt-4 text-red-500">{error}</div>}
-            {answer && (
-              <>
-                <div className="font-medium leading-6 text-lg text-gray-900 pb-2">回答：</div>
-                <p className="mt-2 text-gray-700">{answer}</p>
-              </>
-            )}
-          </>
-        )}
       </div>
     </div>
   );
 };
 
 export default Chat;
+
