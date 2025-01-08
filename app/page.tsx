@@ -15,6 +15,10 @@ const Chat = () => {
   const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
 
+  // API　GatewayのエンドポイントURL
+  const API_ENDPOINT = "https://201wbd5ky7.execute-api.ap-northeast-1.amazonaws.com/picture/upload";
+
+
   // 画像を削除する関数
   const removeImage = (index: number) => {
     const updatedImages = uploadedImages.filter((_, i) => i !== index);
@@ -24,6 +28,25 @@ const Chat = () => {
       setIsImageUploaded(false); // 再度アップロード可能に
     }
   };
+
+  //画像をAPI　Gateway経由でS3にアップロードする関数
+  const uploadImageToS3 = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+
+      const response = await axios.post(API_ENDPOINT, formData, {
+
+        headers : {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Image uploaded successfully:", response.data);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  }
 
   //新しいチャット作成
   const createNewChat = () => {
