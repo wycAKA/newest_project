@@ -12,8 +12,6 @@ const Chat = () => {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [isImageUploaded, setIsImageUploaded] = useState(false);
   const [isFirstQuestion, setIsFirstQuestion] = useState(true);
-  const [firstAnswer, setFirstAnswer] = useState("");
-  const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]);
   const [history, setHistory] = useState<Record<string, { prompt: string; answer: string; images: File[] }[]>>({});
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
@@ -75,18 +73,6 @@ const Chat = () => {
         suggestions.suggestion2,
         suggestions.suggestion3,
       ]);
-
-      if (isFirstQuestion) {
-        setFirstAnswer(res.data.text);
-        setFirstUploadedImages(uploadedImages);
-      }
-
-      if (parsedContent.audioBase64) {
-        const audioData = `data:audio/mp3;base64,${parsedContent.audioBase64}`;
-        setAudioUrl(audioData);
-        const audio = new Audio(audioData);
-        audio.play();
-      }
 
       setHistory((prevHistory) => ({
         ...prevHistory,
