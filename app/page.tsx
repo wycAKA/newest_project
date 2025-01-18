@@ -18,6 +18,10 @@ const Chat = () => {
   const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
+  const [chats, setChats] = useState<{ id: number; prompt: string; answer: string; images: File[] }[]>([
+    { id: 1, prompt: "", answer: "", images: [] },
+  ]);
+  const [currentChatId, setCurrentChatId] = useState(1);
 
   // 画像を削除する関数
   const removeImage = (index: number) => {
@@ -108,6 +112,14 @@ const Chat = () => {
 
       setActiveChat(res.data.text);
       setIsFirstQuestion(false); // 初回終了
+
+      setChats((prevChats) =>
+        prevChats.map((chat) =>
+          chat.id === currentChatId
+            ? { ...chat, prompt, answer: response.text, images: uploadedImages }
+            : chat
+        )
+      );
     } catch (e: unknown) { // unknown型を使用
       if (axios.isAxiosError(e)) { // axiosエラーを型安全にチェック
         if (e.code === "ECONNABORTED") {
@@ -209,22 +221,19 @@ const Chat = () => {
             >
               新しいチャットを作成
             </button>
-            {Object.keys(history).map((month) => (
-              <div key={month} className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-600">{month}</h3>
-                <ul>
-                  {history[month].map((title, index) => (
-                    <li
-                      key={index}
-                      onClick={() => setActiveChat(title)}
-                      className={`cursor-pointer py-1 px-2 ${
-                        activeChat === title ? "bg-indigo-100" : ""
-                      } hover:bg-indigo-50`}
-                    >
-                      {title}
-                    </li>
-                  ))}
-                </ul>
+            {chats.map((chat) => (
+              <div
+                key={chat.id}
+                className="mb-2 cursor-pointer"
+                onClick={() => setCurrentChatId(chat.id)}
+              >
+                <div
+                  className={`p-2 rounded-md ${
+                    chat.id === currentChatId ? "bg-indigo-200" : "bg-gray-100"
+                  }`}
+                >
+                  {chat.prompt || `Chat ${chat.id}`}
+                </div>
               </div>
             ))}
           </div>
@@ -232,29 +241,31 @@ const Chat = () => {
 
         <div className={isHistoryVisible ? "w-3/4" : "w-full"}>
           <div className="flex flex-col h-full">
-            {/* スクロール可能な会話エリア */}
-            <div className = "flex-1 overflow-y-auto p-4">
-              {/* 最初のチャットを固定表示 */}
-              {firstAnswer && (
-                <div className="mb-4">
-                  <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start">
-                    {firstAnswer}
-                  </div>
-                  {firstUploadedImages.length > 0 && (
-                    <div className="py-4 flex flex-wrap gap-4">
-                      {firstUploadedImages.map((file, index) => (
-                        <img
-                          key={index}
-                          src={URL.createObjectURL(file)}
-                          alt={`Uploaded ${index}`}
-                          className="h-20 w-20 object-cover rounded-md shadow"
-                        />
-                      ))}
+            <div className="flex-1 overflow-y-auto p-4">
+              {chats.map((chat) =>
+                chat.id === currentChatId ? (
+                  <div key={chat.id}>
+                    {chat.answer && (
+                      <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start mb-2">
+                        {chat.answer}
                       </div>
                     )}
-                </div>
+                    {chat.images.length > 0 && (
+                      <div className="py-4 flex flex-wrap gap-4">
+                        {chat.images.map((file, index) => (
+                          <img
+                            key={index}
+                            src={URL.createObjectURL(file)}
+                            alt={`Uploaded ${index}`}
+                            className="h-20 w-20 object-cover rounded-md shadow"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : null
               )}
-              {/* 説明文を追加 */}
+
               {isFirstQuestion && (
                 <>
                   <p className="text-left text-ms font-bold">
@@ -265,7 +276,7 @@ const Chat = () => {
                   </p>
                 </>
               )}
-              {/* アップロードされた画像のプレビュー */}
+
               {uploadedImages.length > 0 && (
                 <div className="py-4 flex flex-wrap gap-4">
                   {uploadedImages.map((file, index) => (
@@ -286,7 +297,7 @@ const Chat = () => {
                   ))}
                 </div>
               )}
-              {/* 現在の質問・回答 */}
+
               {prompt && (
                 <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-end mb-2">
                   {prompt}
@@ -295,18 +306,9 @@ const Chat = () => {
               {answer && (
                 <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start mb-2">
                   {answer}
-                  {audioUrl && (
-                    <button
-                      onClick={() => new Audio(audioUrl).play()}
-                      className="mt-2 bg-blue-500 text-white px-2 py-1 rounded"
-                    >
-                      再生
-                    </button>
-                  )}
                 </div>
               )}
 
-              {/* 後続質問候補 */}
               {choices.length > 0 && (
                 <div className="mt-4 space-y-2">
                   {choices.map((choice, index) => (
@@ -314,7 +316,7 @@ const Chat = () => {
                       key={index}
                       onClick={() => setPrompt(choice)}
                       className="bg-gray-600 text-white px-4 py-2 rounded-md w-full text-left shadow-md"
-                    >e
+                    >
                       {choice}
                     </button>
                   ))}
@@ -325,7 +327,6 @@ const Chat = () => {
               {error && <p className="text-red-500">{error}</p>}
             </div>
 
-            {/* 下部固定エリア */}
             <div className="sticky bottom-0 bg-white border-t p-4">
               {isFirstQuestion && (
                 <div
@@ -359,10 +360,9 @@ const Chat = () => {
               )}
               <div className="flex justify-end">
                 {isFirstQuestion ? (
-                  // 初回の送信ボタン
                   <button
                     onClick={generateAnswer}
-                    disabled={uploadedImages.length === 0} // 初回は画像必須
+                    disabled={uploadedImages.length === 0}
                     className={`px-4 py-2 rounded ${
                       uploadedImages.length === 0
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -372,10 +372,9 @@ const Chat = () => {
                     {uploadedImages.length === 0 ? "画像をアップロードしてください" : "送信"}
                   </button>
                 ) : (
-                  // 2回目以降の送信ボタン
                   <button
                     onClick={generateAnswer}
-                    disabled={!prompt} // テキスト入力が必要
+                    disabled={!prompt}
                     className={`px-4 py-2 rounded ${
                       !prompt
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -395,3 +394,4 @@ const Chat = () => {
 };
 
 export default Chat;
+
