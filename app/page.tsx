@@ -47,8 +47,6 @@ const Chat = () => {
   const generateAnswer = async () => {
     setIsLoading(true);
     setError("");
-
-
     try {
       // 初回かどうかでAPIキーを切り替え
       const apiKey = isFirstQuestion
@@ -90,6 +88,13 @@ const Chat = () => {
         setFirstUploadedImages(uploadedImages); // 最初の画像を保存
       }
 
+      // **追加: Base64音声デコードと再生**
+      if (parsedContent.audioBase64) {
+        const audioData = `data:audio/mp3;base64,${parsedContent.audioBase64}`;
+        setAudioUrl(audioData); // 状態にセット
+        const audio = new Audio(audioData); // Audioオブジェクトを生成
+        audio.play(); // 再生
+      }
 
       //追加
       const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
@@ -117,6 +122,34 @@ const Chat = () => {
       setIsLoading(false);
     }
   };
+
+   {/* サジェスト表示エリア */}
+   {choices.length > 0 && (
+    <div className="mt-4 space-y-2">
+      {choices.map((choice, index) => (
+        <button
+          key={index}
+          onClick={() => setPrompt(choice)} // サジェスト選択で質問を更新
+          className="bg-gray-600 text-white px-4 py-2 rounded-md w-full text-left shadow-md"
+        >
+          {choice}
+        </button>
+      ))}
+    </div>
+  )}
+
+  
+   {/* オーディオ再生ボタン */}
+   {audioUrl && (
+    <button
+      onClick={() => new Audio(audioUrl).play()}
+      className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+    >
+      音声を再生
+    </button>
+  )}
+
+  
 
   // ドロップゾーンの設定
   const onDrop = useCallback(
