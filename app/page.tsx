@@ -12,10 +12,11 @@ const Chat = () => {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [isImageUploaded, setIsImageUploaded] = useState(false); // 画像が登録されたか
   const [isFirstQuestion, setIsFirstQuestion] = useState(true); // 初回かどうか
+  const [firstAnswer, setFirstAnswer] = useState(""); // 最初の回答を保存
+  const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]); // 最初の画像を保存
   const [history, setHistory] = useState<Record<string, string[]>>({});
   const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]); // サジェスト用
   const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
 
   // 画像を削除する関数
@@ -46,7 +47,6 @@ const Chat = () => {
   const generateAnswer = async () => {
     setIsLoading(true);
     setError("");
-    setSuggestions([]);//サジェストを初期化
 
 
     try {
