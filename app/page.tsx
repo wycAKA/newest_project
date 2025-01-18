@@ -1,11 +1,12 @@
 "use client";
 import axios from "axios";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback} from "react";
 import { useDropzone } from "react-dropzone";
 
 const Chat = () => {
   const [prompt, setPrompt] = useState("");
   const [answer, setAnswer] = useState("");
+  const [choices, setChoices] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
@@ -14,7 +15,8 @@ const Chat = () => {
   const [history, setHistory] = useState<Record<string, string[]>>({});
   const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
-
+  const [suggestions, setSuggestions] = useState<string[]>([]); // サジェスト用
+  const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
 
   // 画像を削除する関数
   const removeImage = (index: number) => {
@@ -36,6 +38,7 @@ const Chat = () => {
     setIsImageUploaded(false);
     setIsFirstQuestion(true); // 初回に戻す
     setActiveChat("");
+    setChoices([]);
   };
 
   
@@ -43,10 +46,51 @@ const Chat = () => {
   const generateAnswer = async () => {
     setIsLoading(true);
     setError("");
+    setSuggestions([]);//サジェストを初期化
+
 
     try {
-      const res = await axios.post("/api/chatgpt", { prompt }, { timeout: 15000 });
-      setAnswer(res.data.text);
+      // 初回かどうかでAPIキーを切り替え
+      const apiKey = isFirstQuestion
+        ? process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_IMAGE
+        : process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_TEXT;
+  
+      if (!apiKey) {
+        throw new Error("APIキーが設定されていません");
+      }
+
+
+
+      const res = await axios.post(
+        "/api/claude", 
+        { prompt, isFirstQuestion}, // isFirstQuestionをAPIに送信
+        {
+          headers: {
+            "X-API-Key": apiKey, // 適切なAPIキーを設定
+          },
+          timeout: 15000,
+        }
+      );
+
+      // Claudeのレスポンスをパース
+      const parsedContent = JSON.parse(res.data.content[0].text);
+      const response = parsedContent.response;
+      const suggestions = parsedContent.suggestion_list;
+
+
+      setAnswer(response.text);
+      setChoices([
+        suggestions.suggestion1,
+        suggestions.suggestion2,
+        suggestions.suggestion3,
+      ]);
+
+      if (isFirstQuestion) {
+        setFirstAnswer(res.data.text); // 最初の回答を保存
+        setFirstUploadedImages(uploadedImages); // 最初の画像を保存
+      }
+
+
       //追加
       const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
       setHistory((prevHistory) => {
@@ -81,7 +125,7 @@ const Chat = () => {
         const newImages = [...uploadedImages, ...acceptedFiles];
         setUploadedImages(newImages);
 
-        if (newImages.length >= 3) {
+        if (newImages.length >= 1) {
           setIsImageUploaded(true); // 画像が3枚登録された
         }
       }
@@ -94,7 +138,7 @@ const Chat = () => {
     accept: {
       'image/*': [], // 画像ファイルのみを許可
     },
-    maxFiles: 3,
+    maxFiles: 1,
     disabled: isImageUploaded, // 画像がアップロード済みなら無効化
   });
 
@@ -148,67 +192,162 @@ const Chat = () => {
         )}
 
         <div className={isHistoryVisible ? "w-3/4" : "w-full"}>
-          <div className="p-4">
-            {/* ドラッグアンドドロップエリア */}
-            <div
-              {...getRootProps()}
-              className={`p-4 border-dashed border-2 rounded-md text-center mb-4 ${
-                isImageUploaded ? "bg-gray-200 text-gray-400 cursor-not-allowed" : ""
-              }`}
-            >
-              <input {...getInputProps()} />
-              {isImageUploaded ? (
-                <p className="text-ms">画像は最大3枚までアップロードされています</p>
-              ) : (
-                <p className="text-ms">画像をドラッグ＆ドロップするか<br />クリックして選択してください<br />（最大3枚まで）</p>
-              )}
-            </div>
-
-            {/* アップロードされた画像のプレビュー */}
-            {uploadedImages.length > 0 && (
-              <div className="py-4 flex flex-wrap gap-4">
-                {uploadedImages.map((file, index) => (
-                  <div key={index} className="p-1 relative">
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={`Uploaded ${index}`}
-                      className="h-20 w-20 object-cover rounded-md shadow"
-                    />
-                    <button
-                      onClick={() => removeImage(index)}
-                      className="absolute top-0 right-0 text-black bg-gray-500/20 rounded-full h-6 w-6 flex items-center justify-center shadow"
-                      style={{ transform: "translate(50%, -50%)" }}
-                    >
-                      ×
-                    </button>
+          <div className="flex flex-col h-full">
+            {/* スクロール可能な会話エリア */}
+            <div className = "flex-1 overflow-y-auto p-4">
+              {/* 最初のチャットを固定表示 */}
+              {firstAnswer && (
+                <div className="mb-4">
+                  <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start">
+                    {firstAnswer}
                   </div>
-                ))}
-              </div>
-            )}
+                  {firstUploadedImages.length > 0 && (
+                    <div className="py-4 flex flex-wrap gap-4">
+                      {firstUploadedImages.map((file, index) => (
+                        <img
+                          key={index}
+                          src={URL.createObjectURL(file)}
+                          alt={`Uploaded ${index}`}
+                          className="h-20 w-20 object-cover rounded-md shadow"
+                        />
+                      ))}
+                      </div>
+                    )}
+                </div>
+              )}
+              {/* 説明文を追加 */}
+              {isFirstQuestion && (
+                <>
+                  <p className="text-left text-ms font-bold">
+                    調べたい作品の画像を入力してください。
+                  </p>
+                  <p className="text-left text-xs font-bold mb-2">
+                    ※正面・左右など様々な角度から入力すると精度が上がる可能性があります。
+                  </p>
+                </>
+              )}
+              {/* アップロードされた画像のプレビュー */}
+              {uploadedImages.length > 0 && (
+                <div className="py-4 flex flex-wrap gap-4">
+                  {uploadedImages.map((file, index) => (
+                    <div key={index} className="p-1 relative">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Uploaded ${index}`}
+                        className="h-20 w-20 object-cover rounded-md shadow"
+                      />
+                      <button
+                        onClick={() => removeImage(index)}
+                        className="absolute top-0 right-0 text-black bg-gray-500/20 rounded-full h-6 w-6 flex items-center justify-center shadow"
+                        style={{ transform: "translate(50%, -50%)" }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* 現在の質問・回答 */}
+              {prompt && (
+                <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-end mb-2">
+                  {prompt}
+                </div>
+              )}
+              {answer && (
+                <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start mb-2">
+                  {answer}
+                  {audioUrl && (
+                    <button
+                      onClick={() => new Audio(audioUrl).play()}
+                      className="mt-2 bg-blue-500 text-white px-2 py-1 rounded"
+                    >
+                      再生
+                    </button>
+                  )}
+                </div>
+              )}
 
-            {/* チャット入力と回答 */}
-            <div className="flex flex-col">
-              <textarea
-                className="w-full border rounded p-2 mb-4"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={4}
-                placeholder="質問を入力してください"
-                disabled={isFirstQuestion} // 初回は入力不可
-              />
-              <div className="flex justify-end">
-                <button
-                  onClick={generateAnswer}
-                  disabled={isFirstQuestion ? uploadedImages.length === 0 : !prompt} // 初回は画像のみでOK、以降はテキスト必須
-                  className="bg-indigo-600 text-white px-4 py-2 rounded"
+              {/* 後続質問候補 */}
+              {choices.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {choices.map((choice, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setPrompt(choice)}
+                      className="bg-gray-600 text-white px-4 py-2 rounded-md w-full text-left shadow-md"
+                    >e
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {isLoading && <p>読み込み中...</p>}
+              {error && <p className="text-red-500">{error}</p>}
+            </div>
+
+            {/* 下部固定エリア */}
+            <div className="sticky bottom-0 bg-white border-t p-4">
+              {isFirstQuestion && (
+                <div
+                  {...getRootProps()}
+                  className={`p-4 border-dashed border-2 rounded-md text-center mb-4 ${
+                    isImageUploaded ? "bg-gray-200 text-gray-400 cursor-not-allowed" : ""
+                  }`}
                 >
-                  質問する
-                </button>
+                  <input {...getInputProps()} />
+                  {isImageUploaded ? (
+                    <p className="text-ms font-bold">画像は最大3枚までアップロードされています</p>
+                  ) : (
+                    <p className="text-ms font-bold">
+                      画像をドラッグ＆ドロップするか
+                      <br />
+                      クリックして選択してください
+                      <br />
+                      （最大3枚まで）
+                    </p>
+                  )}
+                </div>
+              )}
+              {!isFirstQuestion && (
+                <textarea
+                  className="w-full border rounded p-2 mb-4"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  rows={2}
+                  placeholder="質問を入力してください"
+                />
+              )}
+              <div className="flex justify-end">
+                {isFirstQuestion ? (
+                  // 初回の送信ボタン
+                  <button
+                    onClick={generateAnswer}
+                    disabled={uploadedImages.length === 0} // 初回は画像必須
+                    className={`px-4 py-2 rounded ${
+                      uploadedImages.length === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-indigo-600 text-white"
+                    }`}
+                  >
+                    {uploadedImages.length === 0 ? "画像をアップロードしてください" : "送信"}
+                  </button>
+                ) : (
+                  // 2回目以降の送信ボタン
+                  <button
+                    onClick={generateAnswer}
+                    disabled={!prompt} // テキスト入力が必要
+                    className={`px-4 py-2 rounded ${
+                      !prompt
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-indigo-600 text-white"
+                    }`}
+                  >
+                    {prompt ? "送信" : "質問を入力してください"}
+                  </button>
+                )}
               </div>
             </div>
-            {isLoading && <p>読み込み中...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {answer && <p className="mt-4">{answer}</p>}
           </div>
         </div>
       </div>
@@ -217,4 +356,3 @@ const Chat = () => {
 };
 
 export default Chat;
-
