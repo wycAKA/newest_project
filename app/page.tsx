@@ -39,8 +39,14 @@ const Chat = () => {
 
   const generateAnswer = async () => {
     if (!activeChatId) {
+      setError("アクティブなチャットが選択されていません。");
       return;
     }
+    if (!prompt) {
+      setError("質問を入力してください。");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
     try {
@@ -88,7 +94,7 @@ const Chat = () => {
         if (e.code === "ECONNABORTED") {
           setError("タイムアウト: 15秒以内に回答が返ってきませんでした。");
         } else {
-          setError("エラーが発生しました。");
+          setError(e.response?.data?.message || "エラーが発生しました。");
         }
       } else {
         setError("予期しないエラーが発生しました。");
@@ -189,9 +195,15 @@ const Chat = () => {
                     )}
                   </div>
                 ))}
-                
-               {/* 説明文を追加 */}
-               {isFirstQuestion && (
+
+              {error && (
+                <div className="text-red-500 font-semibold mb-4">
+                  {error}
+                </div>
+              )}
+
+              {/* 説明文を追加 */}
+              {isFirstQuestion && (
                 <>
                   <p className="text-left text-ms font-bold">
                     調べたい作品の画像を入力してください。
@@ -201,7 +213,7 @@ const Chat = () => {
                   </p>
                 </>
               )}
-              
+
               {/* アップロードされた画像のプレビュー */}
               {uploadedImages.length > 0 && (
                 <div className="py-4 flex flex-wrap gap-4">
@@ -266,6 +278,7 @@ const Chat = () => {
                     disabled={uploadedImages.length === 0}
                     className={`px-4 py-2 rounded ${
                       uploadedImages.length === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-indigo-600 text-white"
                     }`}
@@ -295,3 +308,4 @@ const Chat = () => {
 };
 
 export default Chat;
+
