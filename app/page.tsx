@@ -135,25 +135,12 @@ const Chat = () => {
           />
         </button>
         <h1 className="text-lg font-semibold">Art Info</h1>
-        <button onClick={createNewChat}>
-          <img
-            src="/chaticon.png"
-            alt="new chat"
-            className="h-8 w-8 object-contain"
-          />
-        </button>
       </div>
 
       <div className="flex flex-1">
         {isHistoryVisible && (
           <div className="w-1/2 bg-gray-100 p-4 overflow-y-auto">
             <h2 className="text-ms font-bold">会話履歴</h2>
-            <button
-              onClick={createNewChat}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4 shadow-md"
-            >
-              新しいチャットを作成
-            </button>
             {Object.keys(history).map((chatId) => (
               <div
                 key={chatId}
@@ -195,6 +182,17 @@ const Chat = () => {
                     )}
                   </div>
                 ))}
+               {/* 説明文を追加 */}
+               {isFirstQuestion && (
+                <>
+                  <p className="text-left text-ms font-bold">
+                    調べたい作品の画像を入力してください。
+                  </p>
+                  <p className="text-left text-xs font-bold mb-2">
+                    ※正面・左右など様々な角度から入力すると精度が上がる可能性があります。
+                  </p>
+                </>
+              )}  
 
               {/* アップロードされた画像のプレビュー */}
               {uploadedImages.length > 0 && (
