@@ -195,6 +195,31 @@ const Chat = () => {
                     )}
                   </div>
                 ))}
+
+              {/* アップロードされた画像のプレビュー */}
+              {uploadedImages.length > 0 && (
+                <div className="py-4 flex flex-wrap gap-4">
+                  {uploadedImages.map((file, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Preview ${index}`}
+                        className="h-20 w-20 object-cover rounded-md shadow"
+                      />
+                      <button
+                        onClick={() => {
+                          const updatedImages = uploadedImages.filter((_, i) => i !== index);
+                          setUploadedImages(updatedImages);
+                          if (updatedImages.length === 0) setIsImageUploaded(false);
+                        }}
+                        className="absolute top-0 right-0 bg-gray-800 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="sticky bottom-0 bg-white border-t p-4">
