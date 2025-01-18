@@ -15,7 +15,6 @@ const Chat = () => {
   const [history, setHistory] = useState<Record<string, { prompt: string; answer: string; images: File[] }[]>>({});
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const generateChatId = () => {
     return `${new Date().toISOString()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -42,7 +41,7 @@ const Chat = () => {
       setError("アクティブなチャットが選択されていません。");
       return;
     }
-    if (!prompt) {
+    if (!prompt && !isFirstQuestion) {
       setError("質問を入力してください。");
       return;
     }
@@ -109,7 +108,6 @@ const Chat = () => {
       if (acceptedFiles.length > 0) {
         const newImages = [...uploadedImages, ...acceptedFiles];
         setUploadedImages(newImages);
-
         if (newImages.length >= 1) {
           setIsImageUploaded(true);
         }
@@ -120,12 +118,13 @@ const Chat = () => {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: {
-      'image/*': [],
-    },
+    accept: { 'image/*': [] },
     maxFiles: 1,
     disabled: isImageUploaded,
   });
+
+  const buttonStyle = (condition: boolean) =>
+    condition ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-indigo-600 text-white";
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -202,7 +201,6 @@ const Chat = () => {
                 </div>
               )}
 
-              {/* 説明文を追加 */}
               {isFirstQuestion && (
                 <>
                   <p className="text-left text-ms font-bold">
@@ -214,7 +212,6 @@ const Chat = () => {
                 </>
               )}
 
-              {/* アップロードされた画像のプレビュー */}
               {uploadedImages.length > 0 && (
                 <div className="py-4 flex flex-wrap gap-4">
                   {uploadedImages.map((file, index) => (
@@ -272,32 +269,21 @@ const Chat = () => {
                 />
               )}
               <div className="flex justify-end">
-                {isFirstQuestion ? (
-                  <button
-                    onClick={generateAnswer}
-                    disabled={uploadedImages.length === 0}
-                    className={`px-4 py-2 rounded ${
-                      uploadedImages.length === 0
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-indigo-600 text-white"
-                    }`}
-                  >
-                    {uploadedImages.length === 0 ? "画像をアップロードしてください" : "送信"}
-                  </button>
-                ) : (
-                  <button
-                    onClick={generateAnswer}
-                    disabled={!prompt}
-                    className={`px-4 py-2 rounded ${
-                      !prompt
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-indigo-600 text-white"
-                    }`}
-                  >
-                    {prompt ? "送信" : "質問を入力してください"}
-                  </button>
-                )}
+                <button
+                  onClick={generateAnswer}
+                  disabled={isFirstQuestion ? uploadedImages.length === 0 : !prompt}
+                  className={`px-4 py-2 rounded ${buttonStyle(
+                    isFirstQuestion ? uploadedImages.length === 0 : !prompt
+                  )}`}
+                >
+                  {isFirstQuestion
+                    ? uploadedImages.length === 0
+                      ? "画像をアップロードしてください"
+                      : "送信"
+                    : prompt
+                    ? "送信"
+                    : "質問を入力してください"}
+                </button>
               </div>
             </div>
           </div>
@@ -308,4 +294,3 @@ const Chat = () => {
 };
 
 export default Chat;
-
