@@ -138,7 +138,7 @@ const Chat = () => {
     </div>
   )}
 
-  
+
    {/* オーディオ再生ボタン */}
    {audioUrl && (
     <button
@@ -203,6 +203,12 @@ const Chat = () => {
         {isHistoryVisible && (
           <div className="w-1/2 bg-gray-100 p-4 overflow-y-auto">
             <h2 className="text-ms font-bold">会話履歴</h2>
+            <button
+              onClick={createNewChat}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4 shadow-md"
+            >
+              新しいチャットを作成
+            </button>
             {Object.keys(history).map((month) => (
               <div key={month} className="mb-4">
                 <h3 className="text-sm font-semibold text-gray-600">{month}</h3>
@@ -330,14 +336,14 @@ const Chat = () => {
                 >
                   <input {...getInputProps()} />
                   {isImageUploaded ? (
-                    <p className="text-ms font-bold">画像は最大3枚までアップロードされています</p>
+                    <p className="text-ms font-bold">画像は最大1枚までアップロードされています</p>
                   ) : (
                     <p className="text-ms font-bold">
                       画像をドラッグ＆ドロップするか
                       <br />
                       クリックして選択してください
                       <br />
-                      （最大3枚まで）
+                      （最大1枚まで）
                     </p>
                   )}
                 </div>
