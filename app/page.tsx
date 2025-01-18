@@ -135,6 +135,13 @@ const Chat = () => {
           />
         </button>
         <h1 className="text-lg font-semibold">Art Info</h1>
+        <button onClick={createNewChat}>
+          <img
+            src="/chaticon.png"
+            alt="new chat"
+            className="h-8 w-8 object-contain"
+          />
+        </button>
       </div>
 
       <div className="flex flex-1">
@@ -182,6 +189,7 @@ const Chat = () => {
                     )}
                   </div>
                 ))}
+                
                {/* 説明文を追加 */}
                {isFirstQuestion && (
                 <>
@@ -192,8 +200,8 @@ const Chat = () => {
                     ※正面・左右など様々な角度から入力すると精度が上がる可能性があります。
                   </p>
                 </>
-              )}  
-
+              )}
+              
               {/* アップロードされた画像のプレビュー */}
               {uploadedImages.length > 0 && (
                 <div className="py-4 flex flex-wrap gap-4">
