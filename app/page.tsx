@@ -81,7 +81,7 @@ const Chat = () => {
         // モックデータを解析
         const parsedContent = JSON.parse(mockResponse.content[0].text);
         const response = parsedContent.response;
-        const suggestions = parsedContent.suggestion_list;
+        const suggestions = parsedContent.suggestion_list || {}; // デフォルト値を設定
 
         
         const currentMonth = new Date().toLocaleString("en-US", {
@@ -130,7 +130,7 @@ const Chat = () => {
 
       const parsedContent = JSON.parse(res.data.content[0].text);
       const response = parsedContent.response;
-      const suggestions = parsedContent.suggestion_list;
+      const suggestions = parsedContent.suggestion_list || {}; // デフォルト値を設定
 
       const currentMonth = new Date().toLocaleString("en-US", {
         month: "long",
