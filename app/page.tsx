@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
+import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
 
 // interface ApiResponse {
 //   text: string;
@@ -20,7 +21,7 @@ const Chat = () => {
   const [isFirstQuestion, setIsFirstQuestion] = useState(true); // 初回かどうか
   const [firstAnswer, setFirstAnswer] = useState(""); // 最初の回答を保存
   const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]); // 最初の画像を保存
-  const [history, setHistory] = useState<{ type: "question" | "answer"; text: string }[]>([]); // 質問と回答を交互に保存
+  const [history, setHistory] = useState<Record<string, string[]>>({}); // 質問と回答を交互に保存
   const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
