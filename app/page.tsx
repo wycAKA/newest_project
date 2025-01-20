@@ -82,7 +82,7 @@ const Chat = () => {
     setUploadedImages([]); // アップロード画像をリセット
     setIsImageUploaded(false); // 画像アップロードの状態をリセット
     setIsFirstQuestion(true); // 初回状態に戻す
-    setHistory([]); // 会話履歴をリセット
+    setHistory({}); // 会話履歴をリセット
     setActiveChat(""); // アクティブなチャットをリセット
     setFirstAnswer(""); // 最初の回答をリセット
     setFirstUploadedImages([]); // 最初の画像をリセット
