@@ -173,13 +173,15 @@ const Chat = () => {
       // await synthesizeSpeech(res.data.text);
   
       const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+
       setHistory((prevHistory) => {
-        const updatedMonthHistory = prevHistory[currentMonth] || [];
+      const updatedMonthHistory = prevHistory[currentMonth] || [];
         return {
           ...prevHistory,
-          [currentMonth]: [...updatedMonthHistory, res.data.text],
+          [currentMonth]: [...updatedMonthHistory, res.data.text], // 正しい型のオブジェクトを返す
         };
       });
+
   
       // 質問を履歴に追加
       setHistory((prev) => [...prev, { type: "question", text: prompt }]);
