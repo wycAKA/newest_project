@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
-import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
 
 // interface ApiResponse {
 //   text: string;
