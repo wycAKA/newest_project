@@ -145,6 +145,7 @@ const Chat = () => {
       setError(e.message || "エラーが発生しました。");
     } finally {
       setIsLoading(false);
+      setTimeout(scrollToBottom, 100); // 遅延スクロールで選択肢まで表示
     }
   };
 
@@ -203,7 +204,7 @@ const Chat = () => {
               <div key={month} className="mb-4">
                 <h3 className="text-sm font-semibold text-gray-600">{month}</h3>
                 <ul>
-                  {history[month].map((title, index) => (
+                  {history[month]?.map((title, index) => (
                     <li
                       key={index}
                       onClick={() => setActiveChat(title)}
