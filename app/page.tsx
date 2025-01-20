@@ -155,10 +155,10 @@ const Chat = () => {
 
       setAnswer(response.answer);
       setChoices([
-        suggestions.suggestion1,
-        suggestions.suggestion2,
-        suggestions.suggestion3,
-      ]);
+        suggestions.suggestion1 || "選択肢がありません",
+        suggestions.suggestion2 || "選択肢がありません",
+        suggestions.suggestion3 || "選択肢がありません",
+      ])
       setPrompt("");
       setIsFirstQuestion(false);
     } catch (e: any) {
