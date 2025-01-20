@@ -53,18 +53,22 @@ const Chat = () => {
     setFirstUploadedImages([]);
   };
 
+  //回答生成
   const generateAnswer = async () => {
     if (!prompt.trim()) return;
     setIsLoading(true);
     setError("");
 
     try {
+      //初回かどうかでAPIキーを切り替え
       const apiKey = isFirstQuestion
         ? process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_IMAGE
         : process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_TEXT;
 
       if (!apiKey) {
+        // throw new Error("APIキーが設定されていません");
         console.warn("APIキーが設定されていないため、モックデータを使用します");
+        // モックデータを使用
         const mockResponse = {
           content: [
             {
@@ -73,9 +77,13 @@ const Chat = () => {
             },
           ],
         };
+
+        // モックデータを解析
         const parsedContent = JSON.parse(mockResponse.content[0].text);
         const response = parsedContent.response;
+        const suggestions = parsedContent.suggestion_list;
 
+        
         const currentMonth = new Date().toLocaleString("en-US", {
           month: "long",
           year: "numeric",
@@ -98,6 +106,11 @@ const Chat = () => {
         });
 
         setAnswer(response.answer);
+        setChoices([
+          suggestions.suggestion1,
+          suggestions.suggestion2,
+          suggestions.suggestion3,
+        ])
         setPrompt("");
         setIsFirstQuestion(false);
         setIsLoading(false);
@@ -117,6 +130,8 @@ const Chat = () => {
 
       const parsedContent = JSON.parse(res.data.content[0].text);
       const response = parsedContent.response;
+      const suggestions = parsedContent.suggestion_list;
+
       const currentMonth = new Date().toLocaleString("en-US", {
         month: "long",
         year: "numeric",
@@ -139,6 +154,11 @@ const Chat = () => {
       });
 
       setAnswer(response.answer);
+      setChoices([
+        suggestions.suggestion1,
+        suggestions.suggestion2,
+        suggestions.suggestion3,
+      ]);
       setPrompt("");
       setIsFirstQuestion(false);
     } catch (e: any) {
