@@ -1,115 +1,229 @@
 "use client";
-import axios from "axios";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
+import axios from "axios";
+import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
+
+// interface ApiResponse {
+//   text: string;
+//   choices?: string[];
+// }
 
 const Chat = () => {
-  const [prompt, setPrompt] = useState("");
+  const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
+  const [prompt, setPrompt] = useState(initialQuestion);
   const [answer, setAnswer] = useState("");
   const [choices, setChoices] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [isImageUploaded, setIsImageUploaded] = useState(false);
-  const [isFirstQuestion, setIsFirstQuestion] = useState(true);
-  const [history, setHistory] = useState<Record<string, { prompt: string; answer: string; images: File[] }[]>>({});
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [isImageUploaded, setIsImageUploaded] = useState(false); // 画像が登録されたか
+  const [isFirstQuestion, setIsFirstQuestion] = useState(true); // 初回かどうか
+  const [firstAnswer, setFirstAnswer] = useState(""); // 最初の回答を保存
+  const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]); // 最初の画像を保存
+  const [history, setHistory] = useState<{ type: "question" | "answer"; text: string }[]>([]); // 質問と回答を交互に保存
+  const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
+  const scrollContainerRef = useRef<HTMLDivElement>(null); // スクロールコンテナの参照
+  
+  // スクロール動作の設定
+  // React.useEffect(() => {
+  //   if (scrollContainerRef.current) {
+  //     setTimeout(() => {
+  //       scrollContainerRef.current!.scrollTop = scrollContainerRef.current!.scrollHeight;
+  //     }, 0);
+  //   }
+  // }, [history]);
 
-  const generateChatId = () => {
-    return `${new Date().toISOString()}-${Math.random().toString(36).substr(2, 9)}`;
+  // スクロール処理
+  const scrollToBottom = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   };
 
+  // React.useEffect(() => {
+  //   if (scrollContainerRef.current) {
+  //     scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+  //   }
+  // }, [history, choices]);
+
+  // 履歴または選択肢が更新されたときにスクロール
+  useEffect(() => {
+    scrollToBottom();
+  }, [history, choices]);
+
+
+  // 画像を削除する関数
+  const removeImage = (index: number) => {
+    const updatedImages = uploadedImages.filter((_, i) => i !== index);
+    setUploadedImages(updatedImages);
+
+    if (updatedImages.length === 0) {
+      setIsImageUploaded(false); // 再度アップロード可能に
+    }
+  };
+
+  // // AWS Pollyクライアントの作成
+  // const pollyClient = new PollyClient({
+  //   region: process.env.NEXT_PUBLIC_AWS_REGION,
+  //   credentials: {
+  //     accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,
+  //     secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
+  //   },
+  // });
+
+  // 新しいチャット作成
   const createNewChat = () => {
-    const newChatId = generateChatId();
-    setActiveChatId(newChatId);
-    setHistory((prevHistory) => ({
-      ...prevHistory,
-      [newChatId]: [],
-    }));
-    setPrompt("");
-    setAnswer("");
-    setError("");
-    setUploadedImages([]);
-    setIsImageUploaded(false);
-    setIsFirstQuestion(true);
-    setChoices([]);
+    setPrompt(initialQuestion); // 初回の質問に戻す
+    setAnswer(""); // 現在の回答をリセット
+    setChoices([]); // 現在の選択肢をリセット
+    setError(""); // エラーをリセット
+    setUploadedImages([]); // アップロード画像をリセット
+    setIsImageUploaded(false); // 画像アップロードの状態をリセット
+    setIsFirstQuestion(true); // 初回状態に戻す
+    setHistory([]); // 会話履歴をリセット
+    setActiveChat(""); // アクティブなチャットをリセット
+    setFirstAnswer(""); // 最初の回答をリセット
+    setFirstUploadedImages([]); // 最初の画像をリセット
   };
 
+  // 回答生成
   const generateAnswer = async () => {
-    if (!activeChatId) {
-      setError("アクティブなチャットが選択されていません。");
-      return;
-    }
-    if (!prompt && !isFirstQuestion) {
-      setError("質問を入力してください。");
-      return;
-    }
-
+    if (!prompt.trim()) return; // 空の質問を送らない
     setIsLoading(true);
     setError("");
+  
     try {
+      
+      // 初回かどうかでAPIキーを切り替え
       const apiKey = isFirstQuestion
         ? process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_IMAGE
         : process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_TEXT;
-
+  
       if (!apiKey) {
-        throw new Error("APIキーが設定されていません");
+        // throw new Error("APIキーが設定されていません");
+        console.warn("APIキーが設定されていないため、モックデータを使用します");
+        // モックデータを使用
+        const mockResponse = {
+          content: [
+            {
+              type: "text",
+              text: "{\n  \"response\": {\n    \"name\": \"レースを編む女\",\n    \"answer\": \"フェルメールは「牛乳を注ぐ女」や「真珠の耳飾りの少女」など、他の女性労働も描いています。\",\n    \"explain\": \"ヨハネス・フェルメールは、日常生活の一場面を描くことで知られています。「レースを編む女」以外にも、「牛乳を注ぐ女」（1658-1660年頃）では台所で働く女性を、「真珠の耳飾りの少女」（1665年頃）では真珠の耳飾りをつける女性を描いています。これらの作品は、オランダ絵画の黄金時代における市民生活の一端を示しています。\"\n  },\n  \"suggestion_list\": {\n    \"suggestion1\": \"「牛乳を注ぐ女」の特徴は？\",\n    \"suggestion2\": \"フェルメールの作品における光の表現とは？\",\n    \"suggestion3\": \"17世紀オランダの市民生活とは？\"\n  }\n}"
+            }
+          ]
+        };
+
+        // モックデータを解析
+        const parsedContent = JSON.parse(mockResponse.content[0].text);
+        const response = parsedContent.response;
+        const suggestions = parsedContent.suggestion_list;
+
+        setAnswer(response.answer);
+        setChoices([
+          suggestions.suggestion1,
+          suggestions.suggestion2,
+          suggestions.suggestion3,
+        ]);
+
+        if (isFirstQuestion) {
+          setFirstAnswer(response.name); // モックデータから回答を保存
+          setFirstUploadedImages(uploadedImages); // アップロードされた画像を保存
+        }
+        // 質問を履歴に追加
+        setHistory((prev) => [...prev, { type: "question", text: prompt }]);
+        // 回答を履歴に追加
+        setHistory((prev) => [...prev, { type: "answer", text: response.answer }]);
+        setPrompt(""); // 質問欄をリセット
+        setIsFirstQuestion(false);
+        setIsLoading(false);
+        return;
       }
 
+  
       const res = await axios.post(
         "/api/claude",
-        { prompt, isFirstQuestion },
+        { prompt, isFirstQuestion }, // isFirstQuestionをAPIに送信
         {
           headers: {
-            "X-API-Key": apiKey,
+            "X-API-Key": apiKey, // 適切なAPIキーを設定
           },
           timeout: 15000,
         }
       );
 
+      // Claudeのレスポンスをパース
       const parsedContent = JSON.parse(res.data.content[0].text);
       const response = parsedContent.response;
       const suggestions = parsedContent.suggestion_list;
 
-      setAnswer(response.text);
+      setAnswer(response.answer);
       setChoices([
         suggestions.suggestion1,
         suggestions.suggestion2,
         suggestions.suggestion3,
       ]);
-
-      setHistory((prevHistory) => ({
-        ...prevHistory,
-        [activeChatId]: [
-          ...prevHistory[activeChatId],
-          { prompt, answer: response.text, images: uploadedImages },
-        ],
-      }));
-
-      setIsFirstQuestion(false);
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        if (e.code === "ECONNABORTED") {
-          setError("タイムアウト: 15秒以内に回答が返ってきませんでした。");
-        } else {
-          setError(e.response?.data?.message || "エラーが発生しました。");
-        }
-      } else {
-        setError("予期しないエラーが発生しました。");
+  
+      if (isFirstQuestion) {
+        setFirstAnswer(res.data.text); // 最初の回答を保存
+        setFirstUploadedImages(uploadedImages); // 最初の画像を保存
       }
+
+      // // 生成した回答を音声合成
+      // await synthesizeSpeech(res.data.text);
+  
+      const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+      setHistory((prevHistory) => {
+        const updatedMonthHistory = prevHistory[currentMonth] || [];
+        return {
+          ...prevHistory,
+          [currentMonth]: [...updatedMonthHistory, res.data.text],
+        };
+      });
+  
+      // 質問を履歴に追加
+      setHistory((prev) => [...prev, { type: "question", text: prompt }]);
+      setHistory((prev) => [...prev, { type: "answer", text: response }]);
+      setPrompt(""); // 質問欄をリセット
+      setActiveChat(res.data.text);
+      setIsFirstQuestion(false);
+    } catch (e: any) {
+      setError(e.message || "エラーが発生しました。");
     } finally {
       setIsLoading(false);
     }
   };
 
+  
+  // // テキストをAmazon Pollyで音声合成
+  // const synthesizeSpeech = async (text: string) => {
+  //   try {
+  //     const command = new SynthesizeSpeechCommand({
+  //       Text: text,
+  //       OutputFormat: "mp3",
+  //       VoiceId: "Joanna", // 任意の声を選択
+  //     });
+  //     const response = await pollyClient.send(command);
+  //     if (response.AudioStream) {
+  //       const audioBlob = new Blob([response.AudioStream], { type: "audio/mpeg" });
+  //       const audioUrl = URL.createObjectURL(audioBlob);
+  //       setAudioUrl(audioUrl); // 再生用URLを設定
+  //     }
+  //   } catch (err) {
+  //     console.error("Amazon Pollyエラー:", err);
+  //   }
+  // };
+
+  // ドロップゾーンの設定
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
         const newImages = [...uploadedImages, ...acceptedFiles];
         setUploadedImages(newImages);
-        if (newImages.length >= 1) {
-          setIsImageUploaded(true);
+
+        if (newImages.length >= 3) {
+          setIsImageUploaded(true); // 画像が3枚登録された
         }
       }
     },
@@ -118,17 +232,20 @@ const Chat = () => {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: { 'image/*': [] },
-    maxFiles: 1,
-    disabled: isImageUploaded,
+    accept: {
+      "image/*": [] // 画像ファイルを許可
+    },
+    maxFiles: 3,
+    disabled: isImageUploaded, // 画像がアップロード済みなら無効化
   });
-
-  const buttonStyle = (condition: boolean) =>
-    condition ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-indigo-600 text-white";
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <div className="flex justify-between items-center px-4 py-2 bg-gray-800 text-white">
+      {/* ヘッダー */}
+      <div
+       className="fixed top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-800 text-white z-10"
+       style={{ height: "50px" }} // ヘッダーの高さを指定
+       >
         <button
           onClick={() => setIsHistoryVisible(!isHistoryVisible)}
           className="text-xl font-bold"
@@ -149,23 +266,26 @@ const Chat = () => {
         </button>
       </div>
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 mt-[50px]">
         {isHistoryVisible && (
           <div className="w-1/2 bg-gray-100 p-4 overflow-y-auto">
             <h2 className="text-ms font-bold">会話履歴</h2>
-            {Object.keys(history).map((chatId) => (
-              <div
-                key={chatId}
-                className="mb-2 cursor-pointer"
-                onClick={() => setActiveChatId(chatId)}
-              >
-                <div
-                  className={`p-2 rounded-md ${
-                    chatId === activeChatId ? "bg-indigo-200" : "bg-gray-100"
-                  }`}
-                >
-                  Chat {chatId}
-                </div>
+            {Object.keys(history).map((month) => (
+              <div key={month} className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-600">{month}</h3>
+                <ul>
+                  {history[month].map((title, index) => (
+                    <li
+                      key={index}
+                      onClick={() => setActiveChat(title)}
+                      className={`cursor-pointer py-1 px-2 ${
+                        activeChat === title ? "bg-indigo-100" : ""
+                      } hover:bg-indigo-50`}
+                    >
+                      {title}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
@@ -173,16 +293,16 @@ const Chat = () => {
 
         <div className={isHistoryVisible ? "w-3/4" : "w-full"}>
           <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto p-4">
-              {activeChatId &&
-                history[activeChatId]?.map((chat, index) => (
-                  <div key={index} className="mb-4">
-                    <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start">
-                      {chat.answer}
-                    </div>
-                    {chat.images.length > 0 && (
-                      <div className="py-4 flex flex-wrap gap-4">
-                        {chat.images.map((file, index) => (
+            {/* スクロール可能な会話エリア */}
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4">
+              {/* 最初のチャットを固定表示 */}
+              {firstAnswer && (
+                <div className="mb-4">
+                  <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start">
+                    {firstAnswer}
+                    {firstUploadedImages.length > 0 && (
+                      <div className="pt-4 flex flex-wrap gap-4">
+                        {firstUploadedImages.map((file, index) => (
                           <img
                             key={index}
                             src={URL.createObjectURL(file)}
@@ -193,41 +313,30 @@ const Chat = () => {
                       </div>
                     )}
                   </div>
-                ))}
-
-              {error && (
-                <div className="text-red-500 font-semibold mb-4">
-                  {error}
                 </div>
               )}
-
+              {/* 説明文を追加 */}
               {isFirstQuestion && (
                 <>
                   <p className="text-left text-ms font-bold">
                     調べたい作品の画像を入力してください。
                   </p>
-                  <p className="text-left text-xs font-bold mb-2">
-                    ※正面・左右など様々な角度から入力すると精度が上がる可能性があります。
-                  </p>
                 </>
               )}
-
-              {uploadedImages.length > 0 && (
+              {/* アップロードされた画像のプレビュー */}
+              {isFirstQuestion && uploadedImages.length > 0 && (
                 <div className="py-4 flex flex-wrap gap-4">
                   {uploadedImages.map((file, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="p-1 relative">
                       <img
                         src={URL.createObjectURL(file)}
-                        alt={`Preview ${index}`}
+                        alt={`Uploaded ${index}`}
                         className="h-20 w-20 object-cover rounded-md shadow"
                       />
                       <button
-                        onClick={() => {
-                          const updatedImages = uploadedImages.filter((_, i) => i !== index);
-                          setUploadedImages(updatedImages);
-                          if (updatedImages.length === 0) setIsImageUploaded(false);
-                        }}
-                        className="absolute top-0 right-0 bg-gray-800 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-0 right-0 text-black bg-gray-500/20 rounded-full h-6 w-6 flex items-center justify-center shadow"
+                        style={{ transform: "translate(50%, -50%)" }}
                       >
                         ×
                       </button>
@@ -235,8 +344,39 @@ const Chat = () => {
                   ))}
                 </div>
               )}
+
+              {/* 履歴を表示 */}
+              {history.map((entry, index) => (
+                <div
+                  key={index}
+                  className={`mb-4 p-2 rounded-lg ${
+                    entry.type === "question" ? "bg-green-100 text-green-800 self-end" : "bg-gray-200 text-gray-800 self-start"
+                  }`}
+                >
+                  {entry.text}
+                </div>
+              ))}
+
+              {/* 後続質問候補 */}
+              {choices.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {choices.map((choice, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setPrompt(choice)}
+                      className="bg-gray-600 text-white px-4 py-2 rounded-md w-full text-left shadow-md"
+                    >
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {isLoading && <p>読み込み中...</p>}
+              {error && <p className="text-red-500">{error}</p>}
             </div>
 
+            {/* 下部固定エリア */}
             <div className="sticky bottom-0 bg-white border-t p-4">
               {isFirstQuestion && (
                 <div
@@ -247,14 +387,14 @@ const Chat = () => {
                 >
                   <input {...getInputProps()} />
                   {isImageUploaded ? (
-                    <p className="text-ms font-bold">画像は最大1枚までアップロードされています</p>
+                    <p className="text-ms font-bold">画像は最大3枚までアップロードされています</p>
                   ) : (
                     <p className="text-ms font-bold">
                       画像をドラッグ＆ドロップするか
                       <br />
                       クリックして選択してください
                       <br />
-                      （最大1枚まで）
+                      （最大3枚まで）
                     </p>
                   )}
                 </div>
@@ -269,21 +409,37 @@ const Chat = () => {
                 />
               )}
               <div className="flex justify-end">
-                <button
-                  onClick={generateAnswer}
-                  disabled={isFirstQuestion ? uploadedImages.length === 0 : !prompt}
-                  className={`px-4 py-2 rounded ${buttonStyle(
-                    isFirstQuestion ? uploadedImages.length === 0 : !prompt
-                  )}`}
-                >
-                  {isFirstQuestion
-                    ? uploadedImages.length === 0
-                      ? "画像をアップロードしてください"
-                      : "送信"
-                    : prompt
-                    ? "送信"
-                    : "質問を入力してください"}
-                </button>
+                {isFirstQuestion ? (
+                  // 初回の送信ボタン
+                  <button
+                    onClick={generateAnswer}
+                    disabled={
+                      isFirstQuestion && uploadedImages.length === 0 // 初回は画像が必須
+                        ? true
+                        : isLoading || !prompt.trim() // 入力が空または読み込み中の場合も無効化
+                    }
+                    className={`px-4 py-2 rounded ${
+                      uploadedImages.length === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-indigo-600 text-white"
+                    }`}
+                  >
+                    {uploadedImages.length === 0 ? "画像をアップロードしてください" : "送信"}
+                  </button>
+                ) : (
+                  // 2回目以降の送信ボタン
+                  <button
+                    onClick={generateAnswer}
+                    disabled={isLoading || !prompt.trim()} // 入力が空か読み込み中は無効化
+                    className={`px-4 py-2 rounded ${
+                      !prompt
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-indigo-600 text-white"
+                    }`}
+                  >
+                    {prompt ? "送信" : "質問を入力してください"}
+                  </button>
+                )}
               </div>
             </div>
           </div>
