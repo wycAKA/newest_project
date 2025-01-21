@@ -18,6 +18,7 @@ const Chat = () => {
   const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]);
   const [history, setHistory] = useState<{ type: "question" | "answer"; text: string }[]>([]);
   const [activeChatId, setActiveChatId] = useState(uuidv4());
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const [chatList, setChatList] = useState<{ id: string; title: string; history: typeof history }[]>([
     { id: activeChatId, title: "新しいチャット", history: [] },
   ]);
