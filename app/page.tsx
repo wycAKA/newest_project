@@ -16,12 +16,10 @@ const Chat = () => {
   const [isFirstQuestion, setIsFirstQuestion] = useState(true);
   const [firstAnswer, setFirstAnswer] = useState("");
   const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]);
-  const [history, setHistory] = useState<Record<string, string[]>>({});
-  const [activeChat, setActiveChat] = useState<string>(uuidv4());
-  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
-
-  const [allChats, setAllChats] = useState<{ id: string; history: Record<string, string[]> }[]>([
-    { id: activeChat, history: {} },
+  const [history, setHistory] = useState<{ type: "question" | "answer"; text: string }[]>([]);
+  const [activeChatId, setActiveChatId] = useState(uuidv4());
+  const [chatList, setChatList] = useState<{ id: string; title: string; history: typeof history }[]>([
+    { id: activeChatId, title: "新しいチャット", history: [] },
   ]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -46,17 +44,11 @@ const Chat = () => {
   };
 
   const createNewChat = () => {
-    if (Object.keys(history).length > 0) {
-      setAllChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat.id === activeChat ? { ...chat, history } : chat
-        )
-      );
-    }
-
     const newChatId = uuidv4();
-    setActiveChat(newChatId);
-    setAllChats((prevChats) => [...prevChats, { id: newChatId, history: {} }]);
+    const newChat = { id: newChatId, title: `新しいチャット ${chatList.length + 1}`, history: [] };
+
+    setChatList((prev) => [newChat, ...prev]);
+    setActiveChatId(newChatId);
     setPrompt(initialQuestion);
     setAnswer("");
     setChoices([]);
@@ -64,21 +56,29 @@ const Chat = () => {
     setUploadedImages([]);
     setIsImageUploaded(false);
     setIsFirstQuestion(true);
-    setHistory({});
+    setHistory([]);
     setFirstAnswer("");
     setFirstUploadedImages([]);
   };
 
   const switchChat = (chatId: string) => {
-    const selectedChat = allChats.find((chat) => chat.id === chatId);
+    const selectedChat = chatList.find((chat) => chat.id === chatId);
     if (selectedChat) {
-      setActiveChat(chatId);
+      setActiveChatId(chatId);
       setHistory(selectedChat.history);
       setPrompt(initialQuestion);
       setAnswer("");
       setChoices([]);
       setIsFirstQuestion(true);
     }
+  };
+
+  const saveChatHistory = () => {
+    setChatList((prev) =>
+      prev.map((chat) =>
+        chat.id === activeChatId ? { ...chat, history } : chat
+      )
+    );
   };
 
   const generateAnswer = async () => {
@@ -106,26 +106,11 @@ const Chat = () => {
         const response = parsedContent.response;
         const suggestions = parsedContent.suggestion_list || {};
 
-        const currentMonth = new Date().toLocaleString("en-US", {
-          month: "long",
-          year: "numeric",
-        });
-
-        setHistory((prev) => {
-          const updatedMonthHistory = prev[currentMonth] || [];
-          return {
-            ...prev,
-            [currentMonth]: [...updatedMonthHistory, `質問: ${prompt}`],
-          };
-        });
-
-        setHistory((prev) => {
-          const updatedMonthHistory = prev[currentMonth] || [];
-          return {
-            ...prev,
-            [currentMonth]: [...updatedMonthHistory, `回答: ${response.answer}`],
-          };
-        });
+        setHistory((prev) => [
+          ...prev,
+          { type: "question", text: prompt },
+          { type: "answer", text: response.answer },
+        ]);
 
         setAnswer(response.answer);
         setChoices([
@@ -136,6 +121,7 @@ const Chat = () => {
         setPrompt("");
         setIsFirstQuestion(false);
         setIsLoading(false);
+        saveChatHistory();
         return;
       }
 
@@ -154,32 +140,11 @@ const Chat = () => {
       const response = parsedContent.response;
       const suggestions = parsedContent.suggestion_list || {};
 
-      const currentMonth = new Date().toLocaleString("en-US", {
-        month: "long",
-        year: "numeric",
-      });
-
-      setHistory((prev) => {
-        const updatedMonthHistory = prev[currentMonth] || [];
-        return {
-          ...prev,
-          [currentMonth]: [...updatedMonthHistory, `質問: ${prompt}`],
-        };
-      });
-
-      setHistory((prev) => {
-        const updatedMonthHistory = prev[currentMonth] || [];
-        return {
-          ...prev,
-          [currentMonth]: [...updatedMonthHistory, `回答: ${response.answer}`],
-        };
-      });
-
-      setAllChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat.id === activeChat ? { ...chat, history } : chat
-        )
-      );
+      setHistory((prev) => [
+        ...prev,
+        { type: "question", text: prompt },
+        { type: "answer", text: response.answer },
+      ]);
 
       setAnswer(response.answer);
       setChoices([
@@ -189,6 +154,7 @@ const Chat = () => {
       ]);
       setPrompt("");
       setIsFirstQuestion(false);
+      saveChatHistory();
     } catch (e: any) {
       setError(e.message || "エラーが発生しました。");
     } finally {
@@ -246,25 +212,18 @@ const Chat = () => {
 
       <div className="flex flex-1 mt-[50px]">
         {isHistoryVisible && (
-          <div className="w-1/2 bg-gray-100 p-4 overflow-y-auto">
+          <div className="w-1/4 bg-gray-100 p-4 overflow-y-auto">
             <h2 className="text-ms font-bold">すべてのチャット履歴</h2>
-            {allChats.map((chat) => (
+            {chatList.map((chat) => (
               <div key={chat.id} className="mb-4">
                 <h3
-                  className="text-sm font-semibold text-gray-600 cursor-pointer hover:underline"
+                  className={`text-sm font-semibold cursor-pointer hover:underline ${
+                    chat.id === activeChatId ? "text-indigo-500" : "text-gray-600"
+                  }`}
                   onClick={() => switchChat(chat.id)}
                 >
-                  チャットID: {chat.id}
+                  {chat.title}
                 </h3>
-                <ul>
-                  {Object.keys(chat.history).map((month) =>
-                    chat.history[month].map((entry, index) => (
-                      <li key={index} className="py-1 px-2 hover:bg-indigo-50">
-                        {entry}
-                      </li>
-                    ))
-                  )}
-                </ul>
               </div>
             ))}
           </div>
@@ -273,130 +232,42 @@ const Chat = () => {
         <div className={isHistoryVisible ? "w-3/4" : "w-full"}>
           <div className="flex flex-col h-full">
             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4">
-              {firstAnswer && (
-                <div className="mb-4">
-                  <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start">
-                    {firstAnswer}
-                    {firstUploadedImages.length > 0 && (
-                      <div className="pt-4 flex flex-wrap gap-4">
-                        {firstUploadedImages.map((file, index) => (
-                          <img
-                            key={index}
-                            src={URL.createObjectURL(file)}
-                            alt={`Uploaded ${index}`}
-                            className="h-20 w-20 object-cover rounded-md shadow"
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+              {history.map((entry, index) => (
+                <div
+                  key={index}
+                  className={`mb-4 p-2 rounded-lg shadow-md max-w-xs ${
+                    entry.type === "question"
+                      ? "bg-blue-100 text-blue-800 self-end"
+                      : "bg-gray-200 text-gray-800 self-start"
+                  }`}
+                >
+                  {entry.text}
                 </div>
-              )}
-              {isFirstQuestion && (
-                <>
-                  <p className="text-left text-ms font-bold">
-                    調べたい作品の画像を入力してください。
-                  </p>
-                </>
-              )}
-              {isFirstQuestion && uploadedImages.length > 0 && (
-                <div className="py-4 flex flex-wrap gap-4">
-                  {uploadedImages.map((file, index) => (
-                    <div key={index} className="p-1 relative">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={`Uploaded ${index}`}
-                        className="h-20 w-20 object-cover rounded-md shadow"
-                      />
-                      <button
-                        onClick={() => removeImage(index)}
-                        className="absolute top-0 right-0 text-black bg-gray-500/20 rounded-full h-6 w-6 flex items-center justify-center shadow"
-                        style={{ transform: "translate(50%, -50%)" }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {choices.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  {choices.map((choice, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setPrompt(choice)}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-md w-full text-left shadow-md"
-                    >
-                      {choice}
-                    </button>
-                  ))}
-                </div>
-              )}
+              ))}
               {isLoading && <p>読み込み中...</p>}
               {error && <p className="text-red-500">{error}</p>}
             </div>
 
             <div className="sticky bottom-0 bg-white border-t p-4">
-              {isFirstQuestion && (
-                <div
-                  {...getRootProps()}
-                  className={`p-4 border-dashed border-2 rounded-md text-center mb-4 ${
-                    isImageUploaded ? "bg-gray-200 text-gray-400 cursor-not-allowed" : ""
+              <textarea
+                className="w-full border rounded p-2 mb-4"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                rows={2}
+                placeholder="質問を入力してください"
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={generateAnswer}
+                  disabled={isLoading || !prompt.trim()}
+                  className={`px-4 py-2 rounded ${
+                    !prompt
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-indigo-600 text-white"
                   }`}
                 >
-                  <input {...getInputProps()} />
-                  {isImageUploaded ? (
-                    <p className="text-ms font-bold">画像は最大3枚までアップロードされています</p>
-                  ) : (
-                    <p className="text-ms font-bold">
-                      画像をドラッグ＆ドロップするか
-                      <br />
-                      クリックして選択してください
-                      <br />
-                      （最大3枚まで）
-                    </p>
-                  )}
-                </div>
-              )}
-              {!isFirstQuestion && (
-                <textarea
-                  className="w-full border rounded p-2 mb-4"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  rows={2}
-                  placeholder="質問を入力してください"
-                />
-              )}
-              <div className="flex justify-end">
-                {isFirstQuestion ? (
-                  <button
-                    onClick={generateAnswer}
-                    disabled={
-                      isFirstQuestion && uploadedImages.length === 0
-                        ? true
-                        : isLoading || !prompt.trim()
-                    }
-                    className={`px-4 py-2 rounded ${
-                      uploadedImages.length === 0
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-indigo-600 text-white"
-                    }`}
-                  >
-                    {uploadedImages.length === 0 ? "画像をアップロードしてください" : "送信"}
-                  </button>
-                ) : (
-                  <button
-                    onClick={generateAnswer}
-                    disabled={isLoading || !prompt.trim()}
-                    className={`px-4 py-2 rounded ${
-                      !prompt
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-indigo-600 text-white"
-                    }`}
-                  >
-                    {prompt ? "送信" : "質問を入力してください"}
-                  </button>
-                )}
+                  {prompt ? "送信" : "質問を入力してください"}
+                </button>
               </div>
             </div>
           </div>
