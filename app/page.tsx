@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid"; // 一意のID生成
 
 const Chat = () => {
   const initialQuestion = "この作品について教えてください。";
@@ -18,6 +19,10 @@ const Chat = () => {
   const [history, setHistory] = useState<Record<string, string[]>>({});
   const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+
+  const [allChats, setAllChats] = useState<{ id: string; history: Record<string, string[]> }[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string>(uuidv4());
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -40,6 +45,14 @@ const Chat = () => {
   };
 
   const createNewChat = () => {
+    if (Object.keys(history).length > 0) {
+      setAllChats((prevChats) => [
+        ...prevChats,
+        { id: currentChatId, history },
+      ]);
+    }
+
+    setCurrentChatId(uuidv4());
     setPrompt(initialQuestion);
     setAnswer("");
     setChoices([]);
@@ -48,42 +61,35 @@ const Chat = () => {
     setIsImageUploaded(false);
     setIsFirstQuestion(true);
     setHistory({});
-    setActiveChat("");
     setFirstAnswer("");
     setFirstUploadedImages([]);
   };
 
-  //回答生成
   const generateAnswer = async () => {
     if (!prompt.trim()) return;
     setIsLoading(true);
     setError("");
 
     try {
-      //初回かどうかでAPIキーを切り替え
       const apiKey = isFirstQuestion
         ? process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_IMAGE
         : process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_TEXT;
 
       if (!apiKey) {
-        // throw new Error("APIキーが設定されていません");
         console.warn("APIキーが設定されていないため、モックデータを使用します");
-        // モックデータを使用
         const mockResponse = {
           content: [
             {
               type: "text",
-              text: "{\n  \"response\": {\"answer\": \"フェルメールについての情報\"}}",
+              text: "{\n  \"response\": {\"answer\": \"フェルメールについての情報\"},\n  \"suggestion_list\": {\n    \"suggestion1\": \"フェルメールの代表作は？\",\n    \"suggestion2\": \"光の表現について教えて\",\n    \"suggestion3\": \"オランダ黄金時代について\"\n  }\n}",
             },
           ],
         };
 
-        // モックデータを解析
         const parsedContent = JSON.parse(mockResponse.content[0].text);
         const response = parsedContent.response;
-        const suggestions = parsedContent.suggestion_list || {}; // デフォルト値を設定
+        const suggestions = parsedContent.suggestion_list || {};
 
-        
         const currentMonth = new Date().toLocaleString("en-US", {
           month: "long",
           year: "numeric",
@@ -110,7 +116,7 @@ const Chat = () => {
           suggestions.suggestion1 || "選択肢がありません",
           suggestions.suggestion2 || "選択肢がありません",
           suggestions.suggestion3 || "選択肢がありません",
-        ])
+        ]);
         setPrompt("");
         setIsFirstQuestion(false);
         setIsLoading(false);
@@ -130,7 +136,7 @@ const Chat = () => {
 
       const parsedContent = JSON.parse(res.data.content[0].text);
       const response = parsedContent.response;
-      const suggestions = parsedContent.suggestion_list || {}; // デフォルト値を設定
+      const suggestions = parsedContent.suggestion_list || {};
 
       const currentMonth = new Date().toLocaleString("en-US", {
         month: "long",
@@ -158,14 +164,14 @@ const Chat = () => {
         suggestions.suggestion1 || "選択肢がありません",
         suggestions.suggestion2 || "選択肢がありません",
         suggestions.suggestion3 || "選択肢がありません",
-      ])
+      ]);
       setPrompt("");
       setIsFirstQuestion(false);
     } catch (e: any) {
       setError(e.message || "エラーが発生しました。");
     } finally {
       setIsLoading(false);
-      setTimeout(scrollToBottom, 100); // 遅延スクロールで選択肢まで表示
+      setTimeout(scrollToBottom, 100);
     }
   };
 
@@ -219,22 +225,20 @@ const Chat = () => {
       <div className="flex flex-1 mt-[50px]">
         {isHistoryVisible && (
           <div className="w-1/2 bg-gray-100 p-4 overflow-y-auto">
-            <h2 className="text-ms font-bold">会話履歴</h2>
-            {Object.keys(history).map((month) => (
-              <div key={month} className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-600">{month}</h3>
+            <h2 className="text-ms font-bold">すべてのチャット履歴</h2>
+            {allChats.map((chat) => (
+              <div key={chat.id} className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-600">
+                  チャットID: {chat.id}
+                </h3>
                 <ul>
-                  {history[month]?.map((title, index) => (
-                    <li
-                      key={index}
-                      onClick={() => setActiveChat(title)}
-                      className={`cursor-pointer py-1 px-2 ${
-                        activeChat === title ? "bg-indigo-100" : ""
-                      } hover:bg-indigo-50`}
-                    >
-                      {title}
-                    </li>
-                  ))}
+                  {Object.keys(chat.history).map((month) =>
+                    chat.history[month].map((entry, index) => (
+                      <li key={index} className="py-1 px-2 hover:bg-indigo-50">
+                        {entry}
+                      </li>
+                    ))
+                  )}
                 </ul>
               </div>
             ))}
