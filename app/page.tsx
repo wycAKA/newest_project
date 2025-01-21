@@ -16,11 +16,11 @@ const Chat = () => {
   const [firstAnswer, setFirstAnswer] = useState("");
   const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]);
   const [history, setHistory] = useState<Record<string, string[]>>({});
-  const [activeChat, setActiveChat] = useState<string>("チャット1");
+  const [activeChat, setActiveChat] = useState<string>("Chat 1");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
 
   const [allChats, setAllChats] = useState<{ id: string; history: Record<string, string[]> }[]>([
-    { id: activeChat, history: {} },
+    { id: "Chat 1", history: {} },
   ]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +53,7 @@ const Chat = () => {
       );
     }
 
-    const newChatId = `チャット${allChats.length + 1}`;
+    const newChatId = `Chat ${allChats.length + 1}`;
     setActiveChat(newChatId);
     setAllChats((prevChats) => [...prevChats, { id: newChatId, history: {} }]);
     setPrompt(initialQuestion);
@@ -250,7 +250,9 @@ const Chat = () => {
             {allChats.map((chat) => (
               <div key={chat.id} className="mb-4">
                 <h3
-                  className="text-sm font-semibold text-gray-600 cursor-pointer hover:underline"
+                  className={`text-sm font-semibold cursor-pointer hover:underline ${
+                    activeChat === chat.id ? "bg-indigo-200" : ""
+                  }`}
                   onClick={() => switchChat(chat.id)}
                 >
                   {chat.id}
