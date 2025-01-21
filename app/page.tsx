@@ -17,11 +17,12 @@ const Chat = () => {
   const [firstAnswer, setFirstAnswer] = useState("");
   const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]);
   const [history, setHistory] = useState<Record<string, string[]>>({});
-  const [activeChat, setActiveChat] = useState("");
+  const [activeChat, setActiveChat] = useState<string>(uuidv4());
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
 
-  const [allChats, setAllChats] = useState<{ id: string; history: Record<string, string[]> }[]>([]);
-  const [currentChatId, setCurrentChatId] = useState<string>(uuidv4());
+  const [allChats, setAllChats] = useState<{ id: string; history: Record<string, string[]> }[]>([
+    { id: activeChat, history: {} },
+  ]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -46,13 +47,16 @@ const Chat = () => {
 
   const createNewChat = () => {
     if (Object.keys(history).length > 0) {
-      setAllChats((prevChats) => [
-        ...prevChats,
-        { id: currentChatId, history },
-      ]);
+      setAllChats((prevChats) =>
+        prevChats.map((chat) =>
+          chat.id === activeChat ? { ...chat, history } : chat
+        )
+      );
     }
 
-    setCurrentChatId(uuidv4());
+    const newChatId = uuidv4();
+    setActiveChat(newChatId);
+    setAllChats((prevChats) => [...prevChats, { id: newChatId, history: {} }]);
     setPrompt(initialQuestion);
     setAnswer("");
     setChoices([]);
@@ -63,6 +67,18 @@ const Chat = () => {
     setHistory({});
     setFirstAnswer("");
     setFirstUploadedImages([]);
+  };
+
+  const switchChat = (chatId: string) => {
+    const selectedChat = allChats.find((chat) => chat.id === chatId);
+    if (selectedChat) {
+      setActiveChat(chatId);
+      setHistory(selectedChat.history);
+      setPrompt(initialQuestion);
+      setAnswer("");
+      setChoices([]);
+      setIsFirstQuestion(true);
+    }
   };
 
   const generateAnswer = async () => {
@@ -159,6 +175,12 @@ const Chat = () => {
         };
       });
 
+      setAllChats((prevChats) =>
+        prevChats.map((chat) =>
+          chat.id === activeChat ? { ...chat, history } : chat
+        )
+      );
+
       setAnswer(response.answer);
       setChoices([
         suggestions.suggestion1 || "選択肢がありません",
@@ -228,7 +250,10 @@ const Chat = () => {
             <h2 className="text-ms font-bold">すべてのチャット履歴</h2>
             {allChats.map((chat) => (
               <div key={chat.id} className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-600">
+                <h3
+                  className="text-sm font-semibold text-gray-600 cursor-pointer hover:underline"
+                  onClick={() => switchChat(chat.id)}
+                >
                   チャットID: {chat.id}
                 </h3>
                 <ul>
