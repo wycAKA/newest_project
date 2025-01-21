@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid"; // Generate unique IDs
 
 const Chat = () => {
   const initialQuestion = "この作品について教えてください。";
@@ -17,12 +16,12 @@ const Chat = () => {
   const [firstAnswer, setFirstAnswer] = useState("");
   const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]);
   const [history, setHistory] = useState<Record<string, string[]>>({});
-  const [activeChat, setActiveChat] = useState<string>(uuidv4());
+  const [activeChat, setActiveChat] = useState<string>("チャット1");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
 
-  const [allChats, setAllChats] = useState<
-    { id: string; history: Record<string, string[]>; firstAnswer: string }[]
-  >([{ id: activeChat, history: {}, firstAnswer: "" }]);
+  const [allChats, setAllChats] = useState<{ id: string; history: Record<string, string[]> }[]>([
+    { id: activeChat, history: {} },
+  ]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -46,21 +45,17 @@ const Chat = () => {
   };
 
   const createNewChat = () => {
-    // Save current chat state before creating a new chat
-    if (Object.keys(history).length > 0 || firstAnswer) {
+    if (Object.keys(history).length > 0) {
       setAllChats((prevChats) =>
         prevChats.map((chat) =>
-          chat.id === activeChat ? { ...chat, history, firstAnswer } : chat
+          chat.id === activeChat ? { ...chat, history } : chat
         )
       );
     }
 
-    const newChatId = uuidv4();
+    const newChatId = `チャット${allChats.length + 1}`;
     setActiveChat(newChatId);
-    setAllChats((prevChats) => [
-      ...prevChats,
-      { id: newChatId, history: {}, firstAnswer: "" },
-    ]);
+    setAllChats((prevChats) => [...prevChats, { id: newChatId, history: {} }]);
     setPrompt(initialQuestion);
     setAnswer("");
     setChoices([]);
@@ -74,18 +69,10 @@ const Chat = () => {
   };
 
   const switchChat = (chatId: string) => {
-    // Save current chat state before switching
-    setAllChats((prevChats) =>
-      prevChats.map((chat) =>
-        chat.id === activeChat ? { ...chat, history, firstAnswer } : chat
-      )
-    );
-
     const selectedChat = allChats.find((chat) => chat.id === chatId);
     if (selectedChat) {
       setActiveChat(chatId);
       setHistory(selectedChat.history);
-      setFirstAnswer(selectedChat.firstAnswer);
       setPrompt(initialQuestion);
       setAnswer("");
       setChoices([]);
@@ -109,7 +96,7 @@ const Chat = () => {
           content: [
             {
               type: "text",
-              text: '{"response": {"answer": "フェルメールについての情報"}, "suggestion_list": {"suggestion1": "フェルメールの代表作は？", "suggestion2": "光の表現について教えて", "suggestion3": "オランダ黄金時代について"}}',
+              text: "{\n  \"response\": {\"answer\": \"フェルメールについての情報\"},\n  \"suggestion_list\": {\n    \"suggestion1\": \"フェルメールの代表作は？\",\n    \"suggestion2\": \"光の表現について教えて\",\n    \"suggestion3\": \"オランダ黄金時代について\"\n  }\n}",
             },
           ],
         };
@@ -266,7 +253,7 @@ const Chat = () => {
                   className="text-sm font-semibold text-gray-600 cursor-pointer hover:underline"
                   onClick={() => switchChat(chat.id)}
                 >
-                  チャットID: {chat.id}
+                  {chat.id}
                 </h3>
                 <ul>
                   {Object.keys(chat.history).map((month) =>
