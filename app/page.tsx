@@ -380,7 +380,7 @@ const Chat = () => {
                   <input {...getInputProps()} />
                   {isImageUploaded ? (
                     <p className="text-ms font-bold">
-                      画像は最大3枚までアップロードされています
+                      画像は最大1枚までアップロードされています
                     </p>
                   ) : (
                     <p className="text-ms font-bold">
@@ -388,7 +388,7 @@ const Chat = () => {
                       <br />
                       クリックして選択してください
                       <br />
-                      （最大3枚まで）
+                      （最大1枚まで）
                     </p>
                   )}
                 </div>
