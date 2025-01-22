@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
-import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
 
 // interface ApiResponse {
 //   text: string;
@@ -179,14 +178,14 @@ const Chat = () => {
       // // 生成した回答を音声合成
       // await synthesizeSpeech(res.data.text);
   
-      const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
-      setHistory((prevHistory) => {
-        const updatedMonthHistory = prevHistory[currentMonth] || [];
-        return {
-          ...prevHistory,
-          [currentMonth]: [...updatedMonthHistory, res.data.text],
-        };
-      });
+      // const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+      // setHistory((prevHistory) => {
+      //   const updatedMonthHistory = prevHistory[currentMonth] || [];
+      //   return {
+      //     ...prevHistory,
+      //     [currentMonth]: [...updatedMonthHistory, res.data.text],
+      //   };
+      // });
   
       // 質問を履歴に追加
       setHistory((prev) => [...prev, { type: "question", text: prompt }]);
@@ -279,7 +278,7 @@ const Chat = () => {
       </div>
 
       <div className="flex flex-1 mt-[50px]">
-        {isHistoryVisible && (
+        {/* {isHistoryVisible && (
           <div className="w-1/2 bg-gray-100 p-4 overflow-y-auto">
             <h2 className="text-ms font-bold">会話履歴</h2>
             {Object.keys(history).map((month) => (
@@ -301,7 +300,7 @@ const Chat = () => {
               </div>
             ))}
           </div>
-        )}
+        )} */}
 
         <div className={isHistoryVisible ? "w-3/4" : "w-full"}>
           <div className="flex flex-col h-full">
