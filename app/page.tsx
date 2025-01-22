@@ -98,8 +98,8 @@ const Chat = () => {
       
       // 初回かどうかでAPIキーを切り替え
       const apiKey = isFirstQuestion
-        ? process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_IMAGE
-        : process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY_TEXT;
+        ? "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke"
+        : "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
   
       if (!apiKey) {
         // throw new Error("APIキーが設定されていません");
