@@ -4,7 +4,6 @@ import { useDropzone } from "react-dropzone";
 import axios from "axios";
 
 const Chat = () => {
-  // 初期設定: チャットの初期質問や状態を管理
   const initialQuestion = "この作品について教えてください。";
   const [prompt, setPrompt] = useState(initialQuestion);
   const [answer, setAnswer] = useState("");
@@ -20,14 +19,13 @@ const Chat = () => {
   const [activeChat, setActiveChat] = useState<string>("Chat 1");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
 
-  // すべてのチャットを管理する配列
   const [allChats, setAllChats] = useState<{ id: string; history: Record<string, string[]> }[]>([
     { id: "Chat 1", history: {} },
   ]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // チャット画面を常に最下部にスクロール
+  // Automatically scroll to the bottom of the chat container
   const scrollToBottom = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
@@ -38,7 +36,7 @@ const Chat = () => {
     scrollToBottom();
   }, [history, choices]);
 
-  // 画像を削除
+  // Remove an image by index
   const removeImage = (index: number) => {
     const updatedImages = uploadedImages.filter((_, i) => i !== index);
     setUploadedImages(updatedImages);
@@ -48,7 +46,7 @@ const Chat = () => {
     }
   };
 
-  // 新しいチャットを作成
+  // Create a new chat and reset states
   const createNewChat = () => {
     if (Object.keys(history).length > 0) {
       setAllChats((prevChats) =>
@@ -73,7 +71,7 @@ const Chat = () => {
     setFirstUploadedImages([]);
   };
 
-  // チャットを切り替える
+  // Switch to a different chat
   const switchChat = (chatId: string) => {
     const selectedChat = allChats.find((chat) => chat.id === chatId);
     if (selectedChat) {
@@ -86,22 +84,23 @@ const Chat = () => {
     }
   };
 
-  // チャットを削除
+  // Delete a specific chat
   const deleteChat = (chatId: string) => {
     setAllChats((prevChats) => prevChats.filter((chat) => chat.id !== chatId));
-
     if (activeChat === chatId) {
-      const remainingChats = allChats.filter((chat) => chat.id !== chatId);
-      if (remainingChats.length > 0) {
-        setActiveChat(remainingChats[0].id);
-        setHistory(remainingChats[0].history);
+      if (allChats.length > 1) {
+        const nextChat = allChats.find((chat) => chat.id !== chatId);
+        if (nextChat) {
+          setActiveChat(nextChat.id);
+          setHistory(nextChat.history);
+        }
       } else {
         createNewChat();
       }
     }
   };
 
-  // 回答を生成
+  // Generate an answer based on the prompt
   const generateAnswer = async () => {
     if (!prompt.trim()) return;
     setIsLoading(true);
@@ -218,7 +217,6 @@ const Chat = () => {
     }
   };
 
-  // ファイルアップロード
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
@@ -272,7 +270,7 @@ const Chat = () => {
             <h2 className="text-ms font-bold">すべてのチャット履歴</h2>
             {allChats.map((chat) => (
               <div key={chat.id} className="mb-4">
-                <div className="flex items-center justify-between">
+                <div className="flex justify-between items-center">
                   <h3
                     className={`text-sm font-semibold cursor-pointer hover:underline ${
                       activeChat === chat.id ? "bg-indigo-200" : ""
@@ -282,8 +280,8 @@ const Chat = () => {
                     {chat.id}
                   </h3>
                   <button
-                    className="text-red-500 text-xs hover:underline"
                     onClick={() => deleteChat(chat.id)}
+                    className="text-red-500 hover:underline text-sm"
                   >
                     削除
                   </button>
@@ -291,7 +289,10 @@ const Chat = () => {
                 <ul>
                   {Object.keys(chat.history).map((month) =>
                     chat.history[month].map((entry, index) => (
-                      <li key={index} className="py-1 px-2 hover:bg-indigo-50">
+                      <li
+                        key={index}
+                        className="py-1 px-2 hover:bg-indigo-50"
+                      >
                         {entry}
                       </li>
                     ))
@@ -378,7 +379,9 @@ const Chat = () => {
                 >
                   <input {...getInputProps()} />
                   {isImageUploaded ? (
-                    <p className="text-ms font-bold">画像は最大3枚までアップロードされています</p>
+                    <p className="text-ms font-bold">
+                      画像は最大3枚までアップロードされています
+                    </p>
                   ) : (
                     <p className="text-ms font-bold">
                       画像をドラッグ＆ドロップするか
