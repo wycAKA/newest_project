@@ -4,6 +4,7 @@ import { useDropzone } from "react-dropzone";
 import axios from "axios";
 
 const Chat = () => {
+  // 初期設定: チャットの初期質問や状態を管理
   const initialQuestion = "この作品について教えてください。";
   const [prompt, setPrompt] = useState(initialQuestion);
   const [answer, setAnswer] = useState("");
@@ -19,12 +20,14 @@ const Chat = () => {
   const [activeChat, setActiveChat] = useState<string>("Chat 1");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
 
+  // すべてのチャットを管理する配列
   const [allChats, setAllChats] = useState<{ id: string; history: Record<string, string[]> }[]>([
     { id: "Chat 1", history: {} },
   ]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // チャット画面を常に最下部にスクロール
   const scrollToBottom = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
@@ -35,6 +38,7 @@ const Chat = () => {
     scrollToBottom();
   }, [history, choices]);
 
+  // 画像を削除
   const removeImage = (index: number) => {
     const updatedImages = uploadedImages.filter((_, i) => i !== index);
     setUploadedImages(updatedImages);
@@ -44,6 +48,7 @@ const Chat = () => {
     }
   };
 
+  // 新しいチャットを作成
   const createNewChat = () => {
     if (Object.keys(history).length > 0) {
       setAllChats((prevChats) =>
@@ -68,6 +73,7 @@ const Chat = () => {
     setFirstUploadedImages([]);
   };
 
+  // チャットを切り替える
   const switchChat = (chatId: string) => {
     const selectedChat = allChats.find((chat) => chat.id === chatId);
     if (selectedChat) {
@@ -80,6 +86,22 @@ const Chat = () => {
     }
   };
 
+  // チャットを削除
+  const deleteChat = (chatId: string) => {
+    setAllChats((prevChats) => prevChats.filter((chat) => chat.id !== chatId));
+
+    if (activeChat === chatId) {
+      const remainingChats = allChats.filter((chat) => chat.id !== chatId);
+      if (remainingChats.length > 0) {
+        setActiveChat(remainingChats[0].id);
+        setHistory(remainingChats[0].history);
+      } else {
+        createNewChat();
+      }
+    }
+  };
+
+  // 回答を生成
   const generateAnswer = async () => {
     if (!prompt.trim()) return;
     setIsLoading(true);
@@ -196,6 +218,7 @@ const Chat = () => {
     }
   };
 
+  // ファイルアップロード
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
@@ -249,14 +272,22 @@ const Chat = () => {
             <h2 className="text-ms font-bold">すべてのチャット履歴</h2>
             {allChats.map((chat) => (
               <div key={chat.id} className="mb-4">
-                <h3
-                  className={`text-sm font-semibold cursor-pointer hover:underline ${
-                    activeChat === chat.id ? "bg-indigo-200" : ""
-                  }`}
-                  onClick={() => switchChat(chat.id)}
-                >
-                  {chat.id}
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3
+                    className={`text-sm font-semibold cursor-pointer hover:underline ${
+                      activeChat === chat.id ? "bg-indigo-200" : ""
+                    }`}
+                    onClick={() => switchChat(chat.id)}
+                  >
+                    {chat.id}
+                  </h3>
+                  <button
+                    className="text-red-500 text-xs hover:underline"
+                    onClick={() => deleteChat(chat.id)}
+                  >
+                    削除
+                  </button>
+                </div>
                 <ul>
                   {Object.keys(chat.history).map((month) =>
                     chat.history[month].map((entry, index) => (
