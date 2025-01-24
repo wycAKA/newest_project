@@ -129,8 +129,8 @@ const Chat = () => {
       const apiGateway2 = "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
       const apiEndpoint = isFirstQuestion ? apiGateway1 : apiGateway2;
   
-      const base64Images = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
-      const s3Paths = base64Images.map((_, index) => `${folderName.current}/image_${index + 1}.jpg`);
+      // 画像をBase64エンコード
+      const imageFile = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
   
       const payload = {
         prompt,
@@ -144,12 +144,8 @@ const Chat = () => {
         userId,
         logType,
         id,
-        images: base64Images.map((data, index) => ({
-          data,
-          path: s3Paths[index],
-          type: imageType,
-          contentType: "image/jpg" // contentType を追加
-        })),
+        imageFile,
+        contentType: "image/jpg", // contentType を追加
         history,
       };
 
