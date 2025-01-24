@@ -160,6 +160,9 @@ const Chat = () => {
           timeout: 15000,
         }
       );
+
+      // レスポンスの全体をログに出力
+      console.log("APIレスポンス:", res);
   
       // レスポンスデータの解析
       if (res.status === 200 && res.data.content) {
