@@ -130,7 +130,7 @@ const Chat = () => {
       const apiEndpoint = isFirstQuestion ? apiGateway1 : apiGateway2;
   
       const base64Images = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
-      const s3Paths = base64Images.map((_, index) => `${sessionId.current}/image_${index + 1}.jpg`);
+      const s3Paths = base64Images.map((_, index) => `${folderName.current}/image_${index + 1}.jpg`);
   
       const payload = {
         prompt,
