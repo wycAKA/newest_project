@@ -148,6 +148,7 @@ const Chat = () => {
           data,
           path: s3Paths[index],
           type: imageType,
+          contentType: "image/jpeg" // contentType を追加
         })),
         history,
       };
