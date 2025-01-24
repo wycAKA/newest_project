@@ -201,14 +201,20 @@ const Chat = () => {
       };
 
 
+      const apiGateway1 = "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
+      const apiGateway2 = "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
+
+      const apiEndpoint = isFirstQuestion ? apiGateway1 : apiGateway2;
+
       const res = await axios.post(
-        "/api/claude",
+        apiEndpoint,
         { payload, isFirstQuestion }, // isFirstQuestionをAPIに送信
         {
           headers: { "Content-Type": "application/json" },
           timeout: 15000,
         }
       );
+
 
       // Claudeのレスポンスをパース
       const parsedContent = JSON.parse(res.data.content[0].text);
