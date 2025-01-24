@@ -3,31 +3,28 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 
-// interface ApiResponse {
-//   text: string;
-//   choices?: string[];
-// }
-
 const Chat = () => {
-  const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
+  // 初回の質問を指定
+  const initialQuestion = "この作品について教えてください。";
+
+  // 各種状態管理
   const [prompt, setPrompt] = useState(initialQuestion);
   const [answer, setAnswer] = useState("");
   const [choices, setChoices] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [isImageUploaded, setIsImageUploaded] = useState(false); // 画像が登録されたか
-  const [isFirstQuestion, setIsFirstQuestion] = useState(true); // 初回かどうか
-  const [firstAnswer, setFirstAnswer] = useState(""); // 最初の回答を保存
-  const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]); // 最初の画像を保存
-  const [history, setHistory] = useState<{ type: "question" | "answer"; text: string }[]>([]); // 質問と回答を交互に保存
+  const [isImageUploaded, setIsImageUploaded] = useState(false);
+  const [isFirstQuestion, setIsFirstQuestion] = useState(true);
+  const [firstAnswer, setFirstAnswer] = useState("");
+  const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]);
+  const [history, setHistory] = useState<{ type: "question" | "answer"; text: string }[]>([]);
   const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
-  const scrollContainerRef = useRef<HTMLDivElement>(null); // スクロールコンテナの参照
-  
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  //固定値
+  // 固定値（バックエンドで使用する値）
   const dynamoDBTableName = "log-prod";
   const bucketName = "cc2024-prompt-test";
   const s3SystemPromptFile = "system_prompt/system_prompt_20250118.txt";
@@ -35,25 +32,12 @@ const Chat = () => {
   const modelName = "anthropic.claude-3-5-sonnet-20240620-v1:0";
   const imageType = "image/jpg";
 
-
-  //可変値
+  // 可変値（バックエンドで使用する値）
   const folderName = useRef<string>(`session_${Date.now()}`);
   const timeStamp = useRef<string>(new Date().toISOString());
-  const [userId, setUserId] = useState<string>("user123"); // ユーザーID（サンプル値）
+  const [userId, setUserId] = useState<string>("user123");
   const [logType, setLogType] = useState<string>("Message");
   const [id, setId] = useState<string>("id_12345");
-
-
-  // スクロール動作の設定
-  // React.useEffect(() => {
-  //   if (scrollContainerRef.current) {
-  //     setTimeout(() => {
-  //       scrollContainerRef.current!.scrollTop = scrollContainerRef.current!.scrollHeight;
-  //     }, 0);
-  //   }
-  // }, [history]);
-
-  
 
   // スクロール処理
   const scrollToBottom = () => {
@@ -62,18 +46,11 @@ const Chat = () => {
     }
   };
 
-  // React.useEffect(() => {
-  //   if (scrollContainerRef.current) {
-  //     scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-  //   }
-  // }, [history, choices]);
-
-  // 履歴または選択肢が更新されたときにスクロール
   useEffect(() => {
     scrollToBottom();
-  }, [history, choices]); // ここで"history"と"choices" を監視
+  }, [history, choices]); // 履歴や選択肢が更新されたらスクロール
 
-  //画像をBase64エンコード
+  // 画像をBase64エンコード
   const encodeImageToBase64 = async (file: File) => {
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -93,198 +70,133 @@ const Chat = () => {
     }
   };
 
-  // // AWS Pollyクライアントの作成
-  // const pollyClient = new PollyClient({
-  //   region: process.env.NEXT_PUBLIC_AWS_REGION,
-  //   credentials: {
-  //     accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,
-  //     secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
-  //   },
-  // });
-
   // 新しいチャット作成
   const createNewChat = () => {
-    setPrompt(initialQuestion); // 初回の質問に戻す
-    setAnswer(""); // 現在の回答をリセット
-    setChoices([]); // 現在の選択肢をリセット
-    setError(""); // エラーをリセット
-    setUploadedImages([]); // アップロード画像をリセット
-    setIsImageUploaded(false); // 画像アップロードの状態をリセット
-    setIsFirstQuestion(true); // 初回状態に戻す
-    setHistory([]); // 会話履歴をリセット
-    setActiveChat(""); // アクティブなチャットをリセット
-    setFirstAnswer(""); // 最初の回答をリセット
-    setFirstUploadedImages([]); // 最初の画像をリセット
+    setPrompt(initialQuestion);
+    setAnswer("");
+    setChoices([]);
+    setError("");
+    setUploadedImages([]);
+    setIsImageUploaded(false);
+    setIsFirstQuestion(true);
+    setHistory([]);
+    setActiveChat("");
+    setFirstAnswer("");
+    setFirstUploadedImages([]);
   };
 
   // 回答生成
   const generateAnswer = async () => {
-    if (!prompt.trim()) return; // 空の質問を送らない
+    if (!prompt.trim()) return; // 空の質問は送信しない
     setIsLoading(true);
     setError("");
-  
+
     try {
-      // 初回かどうかでAPIキーを切り替え
+      // APIエンドポイントの選択
       const apiGateway1 = "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
       const apiGateway2 = "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
       const apiEndpoint = isFirstQuestion ? apiGateway1 : apiGateway2;
-  
-      // 画像をBase64エンコード
+
+      // アップロードされた画像をBase64エンコード
       const imageFile = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
-  
-      // const payload = {
-      //   node: {
-      //     inputs: [
-      //       {
-      //         value: {
-      //           prompt,
-      //           dynamoDBTableName,
-      //           bucketName,
-      //           s3SystemPromptFile,
-      //           s3UserPromptFile,
-      //           modelName,
-      //           folderName: folderName.current,
-      //           timeStamp: timeStamp.current,
-      //           userId,
-      //           logType,
-      //           id,
-      //           imageFile, // Base64エンコードされた画像データ
-      //           history,
-      //         },
-      //       },
-      //     ],
-      //   },
-      // };
 
-      
-
+      // ペイロードの作成
       const payload = {
         node: {
-          name: "saveImgToS3", // プロセス名を設定
+          name: "saveImgToS3",
           inputs: [
             {
-              name: "Input", // 必要に応じて設定
-              type: "OBJECT", // オブジェクト型を指定
+              name: "Input",
+              type: "OBJECT",
               value: {
-                bucketName: "cc2024-prompt-test", // 必要なS3バケット名
+                bucketName,
                 item: {
-                  timeStamp: new Date().toISOString(), // 現在のタイムスタンプ
+                  timeStamp: timeStamp.current,
                   img: {
-                    bucket: "cc2024-prompt-test",
-                    key: "images/your-image-name.jpg", // S3キー名
-                    url: "https://cc2024-prompt-test.s3.ap-northeast-1.amazonaws.com/images/your-image-name.jpg", // S3 URL
+                    bucket: bucketName,
+                    key: "images/your-image-name.jpg",
+                    url: `https://${bucketName}.s3.ap-northeast-1.amazonaws.com/images/your-image-name.jpg`,
                   },
-                  sender: "User", // メッセージ送信者
-                  tokens: 123, // トークン数（適宜変更）
-                  sessionId: "abcdef78-90ab-cdef-1234-567890abcdef", // セッションID
-                  id: "12345678-90ab-cdef-1234-567890abcdef", // ユニークID
-                  text: "画像の作品の基本情報と詳細情報を教えて。", // ユーザーからのメッセージ
-                  type: "Message", // メッセージタイプ
-                  userId: "yourUserId", // ユーザーID
+                  sender: "User",
+                  tokens: 123,
+                  sessionId: "abcdef78-90ab-cdef-1234-567890abcdef",
+                  id,
+                  text: prompt,
+                  type: logType,
+                  userId,
                 },
-                imageFile: imageFile, // Base64エンコードされた画像データ
-                bucket_name: "cc2024-prompt-test", // 必要に応じてS3バケット名
-                system_key: "system_prompt/system_prompt_20250118.txt", // システムプロンプトファイル
-                folderName: "user-uploads/user-test", // アップロードフォルダ
-                model_id: "anthropic.claude-3-5-sonnet-20240620-v1:0", // モデルID
-                contentType: "image/jpg", // Content-Type
-                message_key: "user_prompt/user_message.json", // メッセージファイルキー
-                tableName: "log-test", // DynamoDBテーブル名
+                imageFile, // Base64エンコードされた画像
+                bucket_name: bucketName,
+                system_key: s3SystemPromptFile,
+                folderName: folderName.current,
+                model_id: modelName,
+                contentType: imageType,
+                message_key: s3UserPromptFile,
+                tableName: dynamoDBTableName,
               },
             },
           ],
         },
       };
-      
-      
-      console.log("Payload being sent to API:", payload);
-      
-  
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒のタイムアウトを設定
-      
-        const response = await fetch(apiEndpoint, {
-          method: "POST", // HTTPメソッドをPOSTに設定
-          headers: {
-            "Content-Type": "application/json", // Content-Typeヘッダーを設定
-          },
-          body: JSON.stringify(payload), // payloadをJSON文字列に変換して送信
-          signal: controller.signal, // AbortControllerのシグナルを渡す
-        });
-      
-        clearTimeout(timeoutId); // タイムアウトをクリア
-      
-        // レスポンスの全体をログに出力
-        console.log("APIレスポンス:", response);
-      
-        // レスポンスデータの解析
-        if (response.ok) {
-          const resData = await response.json();
-          if (resData.content) {
-            const parsedContent = JSON.parse(resData.content[0].text);
-            const responseContent = parsedContent.response;
-            const suggestions = parsedContent.suggestion_list;
-      
-            setAnswer(responseContent.answer);
-      
-            if (isFirstQuestion) {
-              setFirstAnswer(responseContent.name); // 最初の回答を保存
-              setFirstUploadedImages(uploadedImages); // 最初の画像を保存
-            }
-      
-            // 質問と回答を履歴に追加
-            setHistory((prev) => [...prev, { type: "question", text: prompt }]);
-            setHistory((prev) => [...prev, { type: "answer", text: responseContent.answer }]);
-      
-            setChoices([
-              suggestions.suggestion1,
-              suggestions.suggestion2,
-              suggestions.suggestion3,
-            ]);
-            setPrompt(""); // 質問欄をリセット
-            setIsFirstQuestion(false);
-          } else {
-            throw new Error("APIレスポンスが不正です。再度お試しください。");
-          }
-        } else {
-          throw new Error(`APIエラー: HTTPステータス ${response.status}`);
-        }
-      } catch (error) {
-        // エラー詳細をコンソールに記録
-        console.error("エラー発生:", error);
-      
-        // ユーザー向けエラーメッセージを設定
-        if (error.name === "AbortError") {
-          setError("リクエストがタイムアウトしました。再度お試しください。");
-        } else {
-          setError(error.message || "予期しないエラーが発生しました。");
-        }
-      } finally {
-        setIsLoading(false);
-      }
-      
-  
 
-  
-  // // テキストをAmazon Pollyで音声合成
-  // const synthesizeSpeech = async (text: string) => {
-  //   try {
-  //     const command = new SynthesizeSpeechCommand({
-  //       Text: text,
-  //       OutputFormat: "mp3",
-  //       VoiceId: "Joanna", // 任意の声を選択
-  //     });
-  //     const response = await pollyClient.send(command);
-  //     if (response.AudioStream) {
-  //       const audioBlob = new Blob([response.AudioStream], { type: "audio/mpeg" });
-  //       const audioUrl = URL.createObjectURL(audioBlob);
-  //       setAudioUrl(audioUrl); // 再生用URLを設定
-  //     }
-  //   } catch (err) {
-  //     console.error("Amazon Pollyエラー:", err);
-  //   }
-  // };
+      console.log("Payload being sent to API:", payload);
+
+      // APIリクエストの送信
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const resData = await response.json();
+        if (resData.content) {
+          const parsedContent = JSON.parse(resData.content[0].text);
+          const responseContent = parsedContent.response;
+          const suggestions = parsedContent.suggestion_list;
+
+          setAnswer(responseContent.answer);
+
+          if (isFirstQuestion) {
+            setFirstAnswer(responseContent.name);
+            setFirstUploadedImages(uploadedImages);
+          }
+
+          setHistory((prev) => [...prev, { type: "question", text: prompt }]);
+          setHistory((prev) => [...prev, { type: "answer", text: responseContent.answer }]);
+
+          setChoices([
+            suggestions.suggestion1,
+            suggestions.suggestion2,
+            suggestions.suggestion3,
+          ]);
+          setPrompt("");
+          setIsFirstQuestion(false);
+        } else {
+          throw new Error("APIレスポンスが不正です。再度お試しください。");
+        }
+      } else {
+        throw new Error(`APIエラー: HTTPステータス ${response.status}`);
+      }
+    } catch (error) {
+      console.error("エラー発生:", error);
+      if (error.name === "AbortError") {
+        setError("リクエストがタイムアウトしました。再度お試しください。");
+      } else {
+        setError(error.message || "予期しないエラーが発生しました。");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // ドロップゾーンの設定
   const onDrop = useCallback(
@@ -294,7 +206,7 @@ const Chat = () => {
         setUploadedImages(newImages);
 
         if (newImages.length >= 3) {
-          setIsImageUploaded(true); // 画像が3枚登録された
+          setIsImageUploaded(true);
         }
       }
     },
@@ -304,19 +216,19 @@ const Chat = () => {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {
-      "image/*": [] // 画像ファイルを許可
+      "image/*": [],
     },
     maxFiles: 3,
-    disabled: isImageUploaded, // 画像がアップロード済みなら無効化
+    disabled: isImageUploaded,
   });
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* ヘッダー */}
       <div
-       className="fixed top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-800 text-white z-10"
-       style={{ height: "50px" }} // ヘッダーの高さを指定
-       >
+        className="fixed top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-800 text-white z-10"
+        style={{ height: "50px" }}
+      >
         <button
           onClick={() => setIsHistoryVisible(!isHistoryVisible)}
           className="text-xl font-bold"
@@ -338,35 +250,10 @@ const Chat = () => {
       </div>
 
       <div className="flex flex-1 mt-[50px]">
-        {/* {isHistoryVisible && (
-          <div className="w-1/2 bg-gray-100 p-4 overflow-y-auto">
-            <h2 className="text-ms font-bold">会話履歴</h2>
-            {Object.keys(history).map((month) => (
-              <div key={month} className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-600">{month}</h3>
-                <ul>
-                  {history[month].map((title, index) => (
-                    <li
-                      key={index}
-                      onClick={() => setActiveChat(title)}
-                      className={`cursor-pointer py-1 px-2 ${
-                        activeChat === title ? "bg-indigo-100" : ""
-                      } hover:bg-indigo-50`}
-                    >
-                      {title}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        )} */}
-
         <div className={isHistoryVisible ? "w-3/4" : "w-full"}>
           <div className="flex flex-col h-full">
             {/* スクロール可能な会話エリア */}
             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4">
-              {/* 最初のチャットを固定表示 */}
               {firstAnswer && (
                 <div className="mb-4">
                   <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs self-start">
@@ -386,15 +273,13 @@ const Chat = () => {
                   </div>
                 </div>
               )}
-              {/* 説明文を追加 */}
+
               {isFirstQuestion && (
-                <>
-                  <p className="text-left text-ms font-bold">
-                    調べたい作品の画像を入力してください。
-                  </p>
-                </>
+                <p className="text-left text-ms font-bold">
+                  調べたい作品の画像を入力してください。
+                </p>
               )}
-              {/* アップロードされた画像のプレビュー */}
+
               {isFirstQuestion && uploadedImages.length > 0 && (
                 <div className="py-4 flex flex-wrap gap-4">
                   {uploadedImages.map((file, index) => (
@@ -416,21 +301,19 @@ const Chat = () => {
                 </div>
               )}
 
-              {/* 履歴を表示 */}
               {history.map((entry, index) => (
                 <div
                   key={index}
                   className={`mb-4 p-2 rounded-lg ${
                     entry.type === "question"
-                      ? "flex-end bg-green-100 text-green-800 self-end w-[300px] sm:w-[800px]" // smがパソコンの設定
+                      ? "flex-end bg-green-100 text-green-800 self-end w-[300px] sm:w-[800px]"
                       : "flex-start bg-gray-200 text-gray-800 self-start w-[300px] sm:w-[800px]"
                   }`}
                 >
                   {entry.text}
                 </div>
               ))}
-              
-              {/* 後続質問候補 */}
+
               {choices.length > 0 && (
                 <div className="mt-4 space-y-2">
                   {choices.map((choice, index) => (
@@ -483,13 +366,12 @@ const Chat = () => {
               )}
               <div className="flex justify-end">
                 {isFirstQuestion ? (
-                  // 初回の送信ボタン
                   <button
                     onClick={generateAnswer}
                     disabled={
-                      isFirstQuestion && uploadedImages.length === 0 // 初回は画像が必須
+                      isFirstQuestion && uploadedImages.length === 0
                         ? true
-                        : isLoading || !prompt.trim() // 入力が空または読み込み中の場合も無効化
+                        : isLoading || !prompt.trim()
                     }
                     className={`px-4 py-2 rounded ${
                       uploadedImages.length === 0
@@ -500,10 +382,9 @@ const Chat = () => {
                     {uploadedImages.length === 0 ? "画像をアップロードしてください" : "送信"}
                   </button>
                 ) : (
-                  // 2回目以降の送信ボタン
                   <button
                     onClick={generateAnswer}
-                    disabled={isLoading || !prompt.trim()} // 入力が空か読み込み中は無効化
+                    disabled={isLoading || !prompt.trim()}
                     className={`px-4 py-2 rounded ${
                       !prompt
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
