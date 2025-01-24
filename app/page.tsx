@@ -216,18 +216,7 @@ const Chat = () => {
           }
         );
         console.log("Response:", res.data);
-      } catch (any) {
-        if (error.response) {
-          // サーバーからのレスポンスエラー
-          console.error("Error Response:", error.response.data);
-        } else if (error.request) {
-          // リクエストが送信されたがレスポンスがない
-          console.error("No Response:", error.request);
-        } else {
-          // リクエストをセットアップ中のエラー
-          console.error("Error Message:", error.message);
-        }
-      }
+      
       
 
       // Claudeのレスポンスをパース
@@ -276,6 +265,18 @@ const Chat = () => {
     } finally {
       setIsLoading(false);
     }
+    } catch (any) {
+        if (error.response) {
+          // サーバーからのレスポンスエラー
+          console.error("Error Response:", error.response.data);
+        } else if (error.request) {
+          // リクエストが送信されたがレスポンスがない
+          console.error("No Response:", error.request);
+        } else {
+          // リクエストをセットアップ中のエラー
+          console.error("Error Message:", error.message);
+        }
+      }
   };
 
   
