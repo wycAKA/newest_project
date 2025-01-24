@@ -145,7 +145,6 @@ const Chat = () => {
         logType,
         id,
         imageFile,
-        contentType: "image/jpg", // contentType を追加
         history,
       };
 
@@ -153,7 +152,7 @@ const Chat = () => {
   
       const res = await axios.post(
         apiEndpoint,
-        { payload, isFirstQuestion }, // isFirstQuestionをAPIに送信
+        payload, // 修正点: payloadをそのまま送信
         {
           headers: { "Content-Type": "application/json" },
           timeout: 15000,
