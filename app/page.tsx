@@ -29,7 +29,7 @@ const Chat = () => {
 
   //固定値
   const dynamoDBTableName = "log-prod";
-  const s3BucketName = "cc2024-prompt-test";
+  const bucketName = "cc2024-prompt-test";
   const s3SystemPromptFile = "system_prompt/system_prompt_20250118.txt";
   const s3UserPromptFile = "user_prompt/user_message.json";
   const modelName = "anthropic.claude-3-5-sonnet-20240620-v1:0";
@@ -37,7 +37,7 @@ const Chat = () => {
 
 
   //可変値
-  const sessionId = useRef<string>(`session_${Date.now()}`);
+  const folderName = useRef<string>(`session_${Date.now()}`);
   const timeStamp = useRef<string>(new Date().toISOString());
   const [userId, setUserId] = useState<string>("user123"); // ユーザーID（サンプル値）
   const [logType, setLogType] = useState<string>("Message");
@@ -135,11 +135,11 @@ const Chat = () => {
       const payload = {
         prompt,
         dynamoDBTableName,
-        s3BucketName,
+        bucketName,
         s3SystemPromptFile,
         s3UserPromptFile,
         modelName,
-        sessionId: sessionId.current,
+        folderName: folderName.current,
         timeStamp: timeStamp.current,
         userId,
         logType,
