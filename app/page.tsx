@@ -156,19 +156,40 @@ const Chat = () => {
       //   },
       // };
 
+      
+
       const payload = {
         node: {
-          name: "saveImgToS3", // Lambda側で期待されるプロセス名
+          name: "saveImgToS3", // プロセス名を設定
           inputs: [
             {
               name: "Input", // 必要に応じて設定
-              type: "OBJECT", // Lambda側で期待されるタイプ
+              type: "OBJECT", // オブジェクト型を指定
               value: {
-                imageFile, // Base64エンコードされた画像データ
-                contentType: "image/jpg", // Content-Typeの情報を追加
-                bucketName, // S3バケット名
-                folderName: folderName.current, // フォルダ名
-                history, // その他の履歴情報
+                bucketName: "cc2024-prompt-test", // 必要なS3バケット名
+                item: {
+                  timeStamp: new Date().toISOString(), // 現在のタイムスタンプ
+                  img: {
+                    bucket: "cc2024-prompt-test",
+                    key: "images/your-image-name.jpg", // S3キー名
+                    url: "https://cc2024-prompt-test.s3.ap-northeast-1.amazonaws.com/images/your-image-name.jpg", // S3 URL
+                  },
+                  sender: "User", // メッセージ送信者
+                  tokens: 123, // トークン数（適宜変更）
+                  sessionId: "abcdef78-90ab-cdef-1234-567890abcdef", // セッションID
+                  id: "12345678-90ab-cdef-1234-567890abcdef", // ユニークID
+                  text: "画像の作品の基本情報と詳細情報を教えて。", // ユーザーからのメッセージ
+                  type: "Message", // メッセージタイプ
+                  userId: "yourUserId", // ユーザーID
+                },
+                imageFile: imageFile, // Base64エンコードされた画像データ
+                bucket_name: "cc2024-prompt-test", // 必要に応じてS3バケット名
+                system_key: "system_prompt/system_prompt_20250118.txt", // システムプロンプトファイル
+                folderName: "user-uploads/user-test", // アップロードフォルダ
+                model_id: "anthropic.claude-3-5-sonnet-20240620-v1:0", // モデルID
+                contentType: "image/jpg", // Content-Type
+                message_key: "user_prompt/user_message.json", // メッセージファイルキー
+                tableName: "log-test", // DynamoDBテーブル名
               },
             },
           ],
