@@ -26,6 +26,24 @@ const Chat = () => {
   const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
   const scrollContainerRef = useRef<HTMLDivElement>(null); // スクロールコンテナの参照
   
+
+  //固定値
+  const dynamoDBTableName = "log-prod";
+  const s3BucketName = "picture-storage-prod";
+  const s3SystemPromptFile = "system_prompt/system_prompt_20250118.txt";
+  const s3UserPromptFile = "user_prompt/user_message.json";
+  const modelName = "anthropic.claude-3-5-sonnet-20240620-v1:0";
+  const imageType = "image/jpg";
+
+
+  //可変値
+  const sessionId = useRef<string>(`session_${Date.now()}`);
+  const timeStamp = useRef<string>(new Date().toISOString());
+  const [userId, setUserId] = useState<string>("user123"); // ユーザーID（サンプル値）
+  const [logType, setLogType] = useState<string>("Message");
+  const [id, setId] = useState<string>("id_12345");
+
+
   // スクロール動作の設定
   // React.useEffect(() => {
   //   if (scrollContainerRef.current) {
@@ -34,6 +52,8 @@ const Chat = () => {
   //     }, 0);
   //   }
   // }, [history]);
+
+  
 
   // スクロール処理
   const scrollToBottom = () => {
@@ -53,6 +73,15 @@ const Chat = () => {
     scrollToBottom();
   }, [history, choices]); // ここで"history"と"choices" を監視
 
+  //画像をBase64エンコード
+  const encodeImageToBase64 = async (file: File) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  };
 
   // 画像を削除する関数
   const removeImage = (index: number) => {
@@ -145,15 +174,38 @@ const Chat = () => {
         setIsLoading(false);
         return;
       }
+      
 
-  
+      const base64Images = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
+      
+      const s3Paths = base64Images.map((_, index) => `${sessionId.current}/image_${index + 1}.jpg`);
+      
+      const payload = {
+        prompt,
+        dynamoDBTableName,
+        s3BucketName,
+        s3SystemPromptFile,
+        s3UserPromptFile,
+        modelName,
+        sessionId: sessionId.current,
+        timeStamp: timeStamp.current,
+        userId,
+        logType,
+        id,
+        images: base64Images.map((data, index) => ({
+          data,
+          path: s3Paths[index],
+          type: imageType,
+        })),
+        history,
+      };
+
+
       const res = await axios.post(
         "/api/claude",
-        { prompt, isFirstQuestion }, // isFirstQuestionをAPIに送信
+        { payload, isFirstQuestion }, // isFirstQuestionをAPIに送信
         {
-          headers: {
-            "X-API-Key": apiKey, // 適切なAPIキーを設定
-          },
+          headers: { "Content-Type": "application/json" },
           timeout: 15000,
         }
       );

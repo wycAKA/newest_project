@@ -26,8 +26,8 @@ export default async function handler(
   try {
     // 初回かどうかでAPIキーを切り替え
     const apiKey = isFirstQuestion
-      ? process.env.ANTHROPIC_API_KEY_FIRST
-      : process.env.ANTHROPIC_API_KEY_SECOND;
+      ? "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke"
+      : "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
 
     if (!apiKey) {
       throw new Error("APIキーが設定されていません");
