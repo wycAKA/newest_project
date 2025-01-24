@@ -124,62 +124,14 @@ const Chat = () => {
     setError("");
   
     try {
-      
       // 初回かどうかでAPIキーを切り替え
-      const apiKey = isFirstQuestion
-        ? "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke"
-        : "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
+      const apiGateway1 = "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
+      const apiGateway2 = "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
+      const apiEndpoint = isFirstQuestion ? apiGateway1 : apiGateway2;
   
-      if (!apiKey) {
-        // throw new Error("APIキーが設定されていません");
-        console.warn("APIキーが設定されていないため、モックデータを使用します");
-        // モックデータを使用
-        const mockResponse = {
-          content: [
-            {
-              type: "text",
-              text: "{\n  \"response\": {\n    \"name\": \"レースを編む女\",\n    \"answer\": \"フェルメールは「牛乳を注ぐ女」や「真珠の耳飾りの少女」など、他の女性労働も描いています。\",\n    \"explain\": \"ヨハネス・フェルメールは、日常生活の一場面を描くことで知られています。「レースを編む女」以外にも、「牛乳を注ぐ女」（1658-1660年頃）では台所で働く女性を、「真珠の耳飾りの少女」（1665年頃）では真珠の耳飾りをつける女性を描いています。これらの作品は、オランダ絵画の黄金時代における市民生活の一端を示しています。\"\n  },\n  \"suggestion_list\": {\n    \"suggestion1\": \"「牛乳を注ぐ女」の特徴は？\",\n    \"suggestion2\": \"フェルメールの作品における光の表現とは？\",\n    \"suggestion3\": \"17世紀オランダの市民生活とは？\"\n  }\n}"
-            }
-          ]
-        };
-
-        // モックデータを解析
-        const parsedContent = JSON.parse(mockResponse.content[0].text);
-        const response = parsedContent.response;
-        const suggestions = parsedContent.suggestion_list;
-
-        setAnswer(response.answer);
-        // setChoices([
-        //   suggestions.suggestion1,
-        //   suggestions.suggestion2,
-        //   suggestions.suggestion3,
-        // ]);
-
-        if (isFirstQuestion) {
-          setFirstAnswer(response.name); // モックデータから回答を保存
-          setFirstUploadedImages(uploadedImages); // アップロードされた画像を保存
-        }
-        // 質問を履歴に追加
-        setHistory((prev) => [...prev, { type: "question", text: prompt }]);
-        // 回答を履歴に追加
-        setHistory((prev) => [...prev, { type: "answer", text: response.answer }]);
-
-        setChoices([
-          suggestions.suggestion1,
-          suggestions.suggestion2,
-          suggestions.suggestion3,
-        ]);
-        setPrompt(""); // 質問欄をリセット
-        setIsFirstQuestion(false);
-        setIsLoading(false);
-        return;
-      }
-      
-
       const base64Images = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
-      
       const s3Paths = base64Images.map((_, index) => `${sessionId.current}/image_${index + 1}.jpg`);
-      
+  
       const payload = {
         prompt,
         dynamoDBTableName,
@@ -199,85 +151,64 @@ const Chat = () => {
         })),
         history,
       };
-
-
-      const apiGateway1 = "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
-      const apiGateway2 = "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
-
-      const apiEndpoint = isFirstQuestion ? apiGateway1 : apiGateway2;
-
-      try {
-        const res = await axios.post(
-          apiEndpoint,
-          { payload, isFirstQuestion },
-          {
-            headers: { "Content-Type": "application/json" },
-            timeout: 15000,
-          }
-        );
-        console.log("Response:", res.data);
-      
-      
-
-      // Claudeのレスポンスをパース
-      const parsedContent = JSON.parse(res.data.content[0].text);
-      const response = parsedContent.response;
-      const suggestions = parsedContent.suggestion_list;
-
-      setAnswer(response.answer);
-      // setChoices([
-      //   suggestions.suggestion1,
-      //   suggestions.suggestion2,
-      //   suggestions.suggestion3,
-      // ]);
   
-      if (isFirstQuestion) {
-        setFirstAnswer(res.data.text); // 最初の回答を保存
-        setFirstUploadedImages(uploadedImages); // 最初の画像を保存
+      const res = await axios.post(
+        apiEndpoint,
+        { payload, isFirstQuestion }, // isFirstQuestionをAPIに送信
+        {
+          headers: { "Content-Type": "application/json" },
+          timeout: 15000,
+        }
+      );
+  
+      // レスポンスデータの解析
+      if (res.status === 200 && res.data.content) {
+        const parsedContent = JSON.parse(res.data.content[0].text);
+        const response = parsedContent.response;
+        const suggestions = parsedContent.suggestion_list;
+  
+        setAnswer(response.answer);
+  
+        if (isFirstQuestion) {
+          setFirstAnswer(response.name); // 最初の回答を保存
+          setFirstUploadedImages(uploadedImages); // 最初の画像を保存
+        }
+  
+        // 質問と回答を履歴に追加
+        setHistory((prev) => [...prev, { type: "question", text: prompt }]);
+        setHistory((prev) => [...prev, { type: "answer", text: response.answer }]);
+  
+        setChoices([
+          suggestions.suggestion1,
+          suggestions.suggestion2,
+          suggestions.suggestion3,
+        ]);
+        setPrompt(""); // 質問欄をリセット
+        setIsFirstQuestion(false);
+      } else {
+        // ステータスコードやデータが期待通りでない場合のエラーハンドリング
+        throw new Error("APIレスポンスが不正です。再度お試しください。");
       }
-
-      // // 生成した回答を音声合成
-      // await synthesizeSpeech(res.data.text);
+    } catch (error: any) {
+      // エラー詳細をコンソールに記録
+      console.error("エラー発生:", error);
   
-      // const currentMonth = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
-      // setHistory((prevHistory) => {
-      //   const updatedMonthHistory = prevHistory[currentMonth] || [];
-      //   return {
-      //     ...prevHistory,
-      //     [currentMonth]: [...updatedMonthHistory, res.data.text],
-      //   };
-      // });
-  
-      // 質問を履歴に追加
-      setHistory((prev) => [...prev, { type: "question", text: prompt }]);
-      setHistory((prev) => [...prev, { type: "answer", text: response }]);
-
-      setChoices([
-        suggestions.suggestion1,
-        suggestions.suggestion2,
-        suggestions.suggestion3,
-      ]);
-      setPrompt(""); // 質問欄をリセット
-      setActiveChat(res.data.text);
-      setIsFirstQuestion(false);
-    } catch (e: any) {
-      setError(e.message || "エラーが発生しました。");
+      // ユーザー向けエラーメッセージを設定
+      if (error.response) {
+        // サーバーからのレスポンスがある場合
+        setError(`エラーが発生しました (HTTP ${error.response.status}): ${error.response.data.message || "詳細不明"}`);
+      } else if (error.request) {
+        // リクエストが送信されたがレスポンスがない場合
+        setError("サーバーからの応答がありません。ネットワーク接続を確認してください。");
+      } else {
+        // その他のエラー
+        setError(error.message || "予期しないエラーが発生しました。");
+      }
     } finally {
       setIsLoading(false);
     }
-    } catch (any) {
-        if (error.response) {
-          // サーバーからのレスポンスエラー
-          console.error("Error Response:", error.response.data);
-        } else if (error.request) {
-          // リクエストが送信されたがレスポンスがない
-          console.error("No Response:", error.request);
-        } else {
-          // リクエストをセットアップ中のエラー
-          console.error("Error Message:", error.message);
-        }
-      }
   };
+  
 
   
   // // テキストをAmazon Pollyで音声合成
