@@ -206,15 +206,29 @@ const Chat = () => {
 
       const apiEndpoint = isFirstQuestion ? apiGateway1 : apiGateway2;
 
-      const res = await axios.post(
-        apiEndpoint,
-        { payload, isFirstQuestion }, // isFirstQuestionをAPIに送信
-        {
-          headers: { "Content-Type": "application/json" },
-          timeout: 15000,
+      try {
+        const res = await axios.post(
+          apiEndpoint,
+          { payload, isFirstQuestion },
+          {
+            headers: { "Content-Type": "application/json" },
+            timeout: 15000,
+          }
+        );
+        console.log("Response:", res.data);
+      } catch (error) {
+        if (error.response) {
+          // サーバーからのレスポンスエラー
+          console.error("Error Response:", error.response.data);
+        } else if (error.request) {
+          // リクエストが送信されたがレスポンスがない
+          console.error("No Response:", error.request);
+        } else {
+          // リクエストをセットアップ中のエラー
+          console.error("Error Message:", error.message);
         }
-      );
-
+      }
+      
 
       // Claudeのレスポンスをパース
       const parsedContent = JSON.parse(res.data.content[0].text);
