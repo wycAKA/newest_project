@@ -29,7 +29,7 @@ const Chat = () => {
 
   //固定値
   const dynamoDBTableName = "log-prod";
-  const s3BucketName = "picture-art-storage";
+  const s3BucketName = "cc2024-prompt-test";
   const s3SystemPromptFile = "system_prompt/system_prompt_20250118.txt";
   const s3UserPromptFile = "user_prompt/user_message.json";
   const modelName = "anthropic.claude-3-5-sonnet-20240620-v1:0";
