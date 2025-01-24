@@ -200,65 +200,70 @@ const Chat = () => {
       console.log("Payload being sent to API:", payload);
       
   
-      const res = await axios.post(
-        apiEndpoint,
-        payload, // 修正点: payloadをそのまま送信
-        {
-          headers: { "Content-Type": "application/json" },
-          timeout: 15000,
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒のタイムアウトを設定
+      
+        const response = await fetch(apiEndpoint, {
+          method: "POST", // HTTPメソッドをPOSTに設定
+          headers: {
+            "Content-Type": "application/json", // Content-Typeヘッダーを設定
+          },
+          body: JSON.stringify(payload), // payloadをJSON文字列に変換して送信
+          signal: controller.signal, // AbortControllerのシグナルを渡す
+        });
+      
+        clearTimeout(timeoutId); // タイムアウトをクリア
+      
+        // レスポンスの全体をログに出力
+        console.log("APIレスポンス:", response);
+      
+        // レスポンスデータの解析
+        if (response.ok) {
+          const resData = await response.json();
+          if (resData.content) {
+            const parsedContent = JSON.parse(resData.content[0].text);
+            const responseContent = parsedContent.response;
+            const suggestions = parsedContent.suggestion_list;
+      
+            setAnswer(responseContent.answer);
+      
+            if (isFirstQuestion) {
+              setFirstAnswer(responseContent.name); // 最初の回答を保存
+              setFirstUploadedImages(uploadedImages); // 最初の画像を保存
+            }
+      
+            // 質問と回答を履歴に追加
+            setHistory((prev) => [...prev, { type: "question", text: prompt }]);
+            setHistory((prev) => [...prev, { type: "answer", text: responseContent.answer }]);
+      
+            setChoices([
+              suggestions.suggestion1,
+              suggestions.suggestion2,
+              suggestions.suggestion3,
+            ]);
+            setPrompt(""); // 質問欄をリセット
+            setIsFirstQuestion(false);
+          } else {
+            throw new Error("APIレスポンスが不正です。再度お試しください。");
+          }
+        } else {
+          throw new Error(`APIエラー: HTTPステータス ${response.status}`);
         }
-      );
-
-      // レスポンスの全体をログに出力
-      console.log("APIレスポンス:", res);
-  
-      // レスポンスデータの解析
-      if (res.status === 200 && res.data.content) {
-        const parsedContent = JSON.parse(res.data.content[0].text);
-        const response = parsedContent.response;
-        const suggestions = parsedContent.suggestion_list;
-  
-        setAnswer(response.answer);
-  
-        if (isFirstQuestion) {
-          setFirstAnswer(response.name); // 最初の回答を保存
-          setFirstUploadedImages(uploadedImages); // 最初の画像を保存
+      } catch (error) {
+        // エラー詳細をコンソールに記録
+        console.error("エラー発生:", error);
+      
+        // ユーザー向けエラーメッセージを設定
+        if (error.name === "AbortError") {
+          setError("リクエストがタイムアウトしました。再度お試しください。");
+        } else {
+          setError(error.message || "予期しないエラーが発生しました。");
         }
-  
-        // 質問と回答を履歴に追加
-        setHistory((prev) => [...prev, { type: "question", text: prompt }]);
-        setHistory((prev) => [...prev, { type: "answer", text: response.answer }]);
-  
-        setChoices([
-          suggestions.suggestion1,
-          suggestions.suggestion2,
-          suggestions.suggestion3,
-        ]);
-        setPrompt(""); // 質問欄をリセット
-        setIsFirstQuestion(false);
-      } else {
-        // ステータスコードやデータが期待通りでない場合のエラーハンドリング
-        throw new Error("APIレスポンスが不正です。再度お試しください。");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error: any) {
-      // エラー詳細をコンソールに記録
-      console.error("エラー発生:", error);
-  
-      // ユーザー向けエラーメッセージを設定
-      if (error.response) {
-        // サーバーからのレスポンスがある場合
-        setError(`エラーが発生しました (HTTP ${error.response.status}): ${error.response.data.message || "詳細不明"}`);
-      } else if (error.request) {
-        // リクエストが送信されたがレスポンスがない場合
-        setError("サーバーからの応答がありません。ネットワーク接続を確認してください。");
-      } else {
-        // その他のエラー
-        setError(error.message || "予期しないエラーが発生しました。");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      
   
 
   
