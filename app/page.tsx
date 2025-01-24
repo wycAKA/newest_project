@@ -133,20 +133,46 @@ const Chat = () => {
       const imageFile = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
   
       const payload = {
-        prompt,
-        dynamoDBTableName,
-        bucketName,
-        s3SystemPromptFile,
-        s3UserPromptFile,
-        modelName,
-        folderName: folderName.current,
-        timeStamp: timeStamp.current,
-        userId,
-        logType,
-        id,
-        imageFile,
-        history,
+        node: {
+          inputs: [
+            {
+              value: {
+                prompt,
+                dynamoDBTableName,
+                bucketName,
+                s3SystemPromptFile,
+                s3UserPromptFile,
+                modelName,
+                folderName: folderName.current,
+                timeStamp: timeStamp.current,
+                userId,
+                logType,
+                id,
+                imageFile, // Base64エンコードされた画像データ
+                history,
+              },
+            },
+          ],
+        },
       };
+      
+      console.log("Payload being sent to API:", payload);
+      
+      try {
+        const res = await axios.post(
+          apiEndpoint,
+          payload, // 修正後のPayloadをそのまま送信
+          {
+            headers: { "Content-Type": "application/json" }, // Content-Typeを設定
+            timeout: 15000, // タイムアウト設定
+          }
+        );
+      
+        console.log("Response from API:", res.data);
+      } catch (error) {
+        console.error("Error sending payload to API:", error);
+      }
+      
 
       console.log("Payload being sent to API:", payload);
   
