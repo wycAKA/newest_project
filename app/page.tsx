@@ -158,11 +158,16 @@ const Chat = () => {
 
       if (response.ok) {
         const resData = await response.json();
+
+        // 受け取ったレスポンスデータをログに出力
+        console.log("レスポンスデータ:", resData);
+
         if (resData.content) {
           const parsedContent = JSON.parse(resData.content[0].text);
           const responseContent = parsedContent.response;
           const suggestions = parsedContent.suggestion_list;
-
+          
+          console.log("解析されたレスポンス:", parsedContent);
           setAnswer(responseContent.answer);
 
           if (isFirstQuestion) {
