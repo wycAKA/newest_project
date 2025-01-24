@@ -100,6 +100,9 @@ const Chat = () => {
       // アップロードされた画像をBase64エンコード
       const imageFile = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
 
+      console.log("Base64 encoded image:", imageFile);
+      console.log("Uploaded images:", uploadedImages);
+
       // ペイロードの作成
       const payload = {
         node: {
@@ -166,7 +169,7 @@ const Chat = () => {
           const parsedContent = JSON.parse(resData.content[0].text);
           const responseContent = parsedContent.response;
           const suggestions = parsedContent.suggestion_list;
-          
+
           console.log("解析されたレスポンス:", parsedContent);
           setAnswer(responseContent.answer);
 
