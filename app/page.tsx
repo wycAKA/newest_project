@@ -101,6 +101,7 @@ const Chat = () => {
       const imageFile = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
 
       console.log("Base64 encoded image:", imageFile);
+      
       console.log("Uploaded images:", uploadedImages);
 
       // ペイロードの作成
