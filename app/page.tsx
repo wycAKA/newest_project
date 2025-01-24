@@ -132,29 +132,49 @@ const Chat = () => {
       // 画像をBase64エンコード
       const imageFile = await Promise.all(uploadedImages.map((file) => encodeImageToBase64(file)));
   
+      // const payload = {
+      //   node: {
+      //     inputs: [
+      //       {
+      //         value: {
+      //           prompt,
+      //           dynamoDBTableName,
+      //           bucketName,
+      //           s3SystemPromptFile,
+      //           s3UserPromptFile,
+      //           modelName,
+      //           folderName: folderName.current,
+      //           timeStamp: timeStamp.current,
+      //           userId,
+      //           logType,
+      //           id,
+      //           imageFile, // Base64エンコードされた画像データ
+      //           history,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // };
+
       const payload = {
         node: {
+          name: "saveImgToS3", // Lambda側で期待されるプロセス名
           inputs: [
             {
+              name: "Input", // 必要に応じて設定
+              type: "OBJECT", // Lambda側で期待されるタイプ
               value: {
-                prompt,
-                dynamoDBTableName,
-                bucketName,
-                s3SystemPromptFile,
-                s3UserPromptFile,
-                modelName,
-                folderName: folderName.current,
-                timeStamp: timeStamp.current,
-                userId,
-                logType,
-                id,
                 imageFile, // Base64エンコードされた画像データ
-                history,
+                contentType: "image/jpg", // Content-Typeの情報を追加
+                bucketName, // S3バケット名
+                folderName: folderName.current, // フォルダ名
+                history, // その他の履歴情報
               },
             },
           ],
         },
       };
+      
       
       console.log("Payload being sent to API:", payload);
       
