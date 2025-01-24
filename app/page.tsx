@@ -188,10 +188,12 @@ const Chat = () => {
       }
     } catch (error) {
       console.error("エラー発生:", error);
-      if (error.name === "AbortError") {
+
+      const typedError = error as Error;
+      if (typedError.name === "AbortError") {
         setError("リクエストがタイムアウトしました。再度お試しください。");
       } else {
-        setError(error.message || "予期しないエラーが発生しました。");
+        setError(typedError.message || "予期しないエラーが発生しました。");
       }
     } finally {
       setIsLoading(false);
