@@ -158,23 +158,6 @@ const Chat = () => {
       
       console.log("Payload being sent to API:", payload);
       
-      try {
-        const res = await axios.post(
-          apiEndpoint,
-          payload, // 修正後のPayloadをそのまま送信
-          {
-            headers: { "Content-Type": "application/json" }, // Content-Typeを設定
-            timeout: 15000, // タイムアウト設定
-          }
-        );
-      
-        console.log("Response from API:", res.data);
-      } catch (error) {
-        console.error("Error sending payload to API:", error);
-      }
-      
-
-      console.log("Payload being sent to API:", payload);
   
       const res = await axios.post(
         apiEndpoint,
