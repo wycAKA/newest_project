@@ -216,7 +216,7 @@ const Chat = () => {
           }
         );
         console.log("Response:", res.data);
-      } catch (error) {
+      } catch (any) {
         if (error.response) {
           // サーバーからのレスポンスエラー
           console.error("Error Response:", error.response.data);
