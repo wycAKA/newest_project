@@ -142,12 +142,21 @@ const Chat = () => {
         )
       );
 
-      const encodeFileName = (name) => {
+      const encodeFileName = (name: string): string => {
         return encodeURIComponent(name).replace(/%2F/g, "/").replace(/%20/g, "+");
       };
       
-      const key = `images/${uuidv4()}-${encodeFileName(uploadedImages[0]?.name || "image.jpg")}`;
-      const url = `https://cc2024-prompt-test.s3.ap-northeast-1.amazonaws.com/${key}`;
+      const truncateFileName = (name: string, maxLength: number = 50): string => {
+        const extension = name.slice(name.lastIndexOf("."));
+        const baseName = name.slice(0, name.lastIndexOf("."));
+        return baseName.slice(0, maxLength) + extension;
+      };
+      
+      const uploadedFileName: string = uploadedImages[0]?.name || "image.jpg";
+      const truncatedFileName: string = truncateFileName(uploadedFileName);
+      
+      const key: string = `images/${uuidv4()}-${encodeFileName(truncatedFileName)}`;
+      const url: string = `https://cc2024-prompt-test.s3.ap-northeast-1.amazonaws.com/${key}`;
 
       // 現在のタイムスタンプ
       const timeStamp = new Date().toISOString();
