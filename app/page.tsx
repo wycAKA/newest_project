@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid"; // UUIDライブラリをインポート
  
 const Chat = () => {
   const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
@@ -70,6 +71,9 @@ const Chat = () => {
       const apiEndpoint = isFirstQuestion
         ? "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke"
         : "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
+
+      // sessionIdを動的に生成
+      const sessionId = uuidv4(); 
  
       // FormDataを作成
       const formData = new FormData();
@@ -150,7 +154,7 @@ const Chat = () => {
           imageFile: encodedImages[0] || "", // 最初の画像を送信（複数の場合は拡張が必要）
           contentType: uploadedImages[0]?.type || "image/jpg",
           item: {
-            sessionId: "abcdef78-90ab-cdef-1234-567890abcdef",
+            sessionId: sessionId,
             id: "12345678-90ab-cdef-1234-567890abcdef",
             type: "Message",
             userId: "yourUserId",
