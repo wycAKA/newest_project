@@ -126,19 +126,59 @@ const Chat = () => {
         return;
       }
  
-      // 送信時のデータ形式を設定
-      // アップロードした画像等も入れる
-      const payload = {prompt};
+        // Base64エンコードされた画像データを作成
+      const encodedImages = await Promise.all(
+        uploadedImages.map((file) =>
+          new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result?.toString().split(",")[1]);
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+          })
+        )
+      );
 
-       // FormDataの中身を出力
-      console.log("FormData to send:");
-      formData.forEach((value, key) => {
-        console.log(`${key}:`, value);
-      });
+      // 現在のタイムスタンプ
+      const timeStamp = new Date().toISOString();
+
+      // バックエンドに送信するデータを構築
+      const payload = {
+        document: {
+          tableName: "log-test",
+          bucketName: "picture-art-storage",
+          folderName: "user-uploads/user-test",
+          imageFile: encodedImages[0] || "", // 最初の画像を送信（複数の場合は拡張が必要）
+          contentType: uploadedImages[0]?.type || "image/jpg",
+          item: {
+            sessionId: "abcdef78-90ab-cdef-1234-567890abcdef",
+            id: "12345678-90ab-cdef-1234-567890abcdef",
+            type: "Message",
+            userId: "yourUserId",
+            tokens: 123, // 必要なら適切なトークン数に置き換え
+            timeStamp,
+            sender: "User",
+            text: prompt,
+            img: {
+              bucket: "cc2024-prompt-test",
+              key: "images/" + encodeURIComponent(uploadedImages[0]?.name || "image.jpg"),
+              url: `https://cc2024-prompt-test.s3.ap-northeast-1.amazonaws.com/images/${encodeURIComponent(
+                uploadedImages[0]?.name || "image.jpg"
+              )}`,
+            },
+          },
+          model_id: "anthropic.claude-3-5-sonnet-20240620-v1:0",
+          bucket_name: "cc2024-prompt-test",
+          system_key: "system_prompt/system_prompt_20250118.txt",
+          message_key: "user_prompt/user_message.json",
+        },
+      };
+
+      // 送信するデータをコンソールで確認
+      console.log("Payload to send:", payload);
 
  
       // APIリクエストの送信
-      const res = await axios.post(apiEndpoint, formData, {
+      const res = await axios.post(apiEndpoint, payload, {
         headers: {
           "Content-Type": "application/json", // 必要に応じて適切なContent-Typeを指定
         },
