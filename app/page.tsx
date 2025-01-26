@@ -129,6 +129,9 @@ const Chat = () => {
       // 送信時のデータ形式を設定
       // アップロードした画像等も入れる
       const payload = {prompt};
+
+      //送信パラメータ出力する
+      console.log("送信パラメータ：" + formData);
  
       // APIリクエストの送信
       const res = await axios.post(apiEndpoint, formData, {
