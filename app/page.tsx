@@ -130,8 +130,12 @@ const Chat = () => {
       // アップロードした画像等も入れる
       const payload = {prompt};
 
-      //送信パラメータ出力する
-      console.log("送信パラメータ：" + formData);
+       // FormDataの中身を出力
+      console.log("FormData to send:");
+      formData.forEach((value, key) => {
+        console.log(`${key}:`, value);
+      });
+
  
       // APIリクエストの送信
       const res = await axios.post(apiEndpoint, formData, {
