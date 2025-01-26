@@ -137,6 +137,9 @@ const Chat = () => {
         },
         timeout: 15000, // タイムアウトを設定
       });
+
+      // レスポンスを出力して確認
+      console.log("API Response:", res);
  
       // APIがきちんと設定されている場合
       // Claudeのレスポンスをパース
