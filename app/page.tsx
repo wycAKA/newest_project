@@ -186,7 +186,7 @@ const Chat = () => {
         headers: {
           "Content-Type": "application/json", // 必要に応じて適切なContent-Typeを指定
         },
-        timeout: 15000, // タイムアウトを設定
+        timeout: 30000, // タイムアウトを設定
       });
 
       // レスポンスを出力して確認
