@@ -142,6 +142,13 @@ const Chat = () => {
         )
       );
 
+      const encodeFileName = (name) => {
+        return encodeURIComponent(name).replace(/%2F/g, "/").replace(/%20/g, "+");
+      };
+      
+      const key = `images/${uuidv4()}-${encodeFileName(uploadedImages[0]?.name || "image.jpg")}`;
+      const url = `https://cc2024-prompt-test.s3.ap-northeast-1.amazonaws.com/${key}`;
+
       // 現在のタイムスタンプ
       const timeStamp = new Date().toISOString();
 
@@ -164,10 +171,8 @@ const Chat = () => {
             text: prompt,
             img: {
               bucket: "cc2024-prompt-test",
-              key: "images/" + encodeURIComponent(uploadedImages[0]?.name || "image.jpg"),
-              url: `https://cc2024-prompt-test.s3.ap-northeast-1.amazonaws.com/images/${encodeURIComponent(
-                uploadedImages[0]?.name || "image.jpg"
-              )}`,
+              key: key,
+              url: url,
             },
           },
           model_id: "anthropic.claude-3-5-sonnet-20240620-v1:0",
