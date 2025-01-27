@@ -151,7 +151,8 @@ const Chat = () => {
         document: {
           tableName: "log-test",
           bucketName: "picture-art-storage",
-          folderName: "user-uploads/user-test",
+          //folderName: "user-uploads/user-test",
+          folderName: sessionId,
           imageFile: encodedImages[0] || "", // 最初の画像を送信（複数の場合は拡張が必要）
           contentType: uploadedImages[0]?.type || "image/jpg",
           item: {
