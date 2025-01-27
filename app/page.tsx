@@ -149,8 +149,8 @@ const Chat = () => {
       // バックエンドに送信するデータを構築
       const payload = {
         document: {
-          tableName: "log-test",
-          bucketName: "picture-art-storage",
+          tableName: "log-prod",
+          bucketName: "picture-storage-prod",
           //folderName: "user-uploads/user-test",
           folderName: sessionId,
           imageFile: encodedImages[0] || "", // 最初の画像を送信（複数の場合は拡張が必要）
