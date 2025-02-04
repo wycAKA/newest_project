@@ -199,6 +199,12 @@ const Chat = () => {
       const parsedContent = JSON.parse(res.data.content[0].text);
       const response = parsedContent.response;
       const suggestions = parsedContent.suggestion_list;
+
+      console.log("parsedContent" + parsedContent);
+
+      console.log("response" + response);
+
+      console.log("suggestions" + suggestions);
  
       setAnswer(response.answer);
       setChoices([
