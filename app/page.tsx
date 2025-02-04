@@ -237,7 +237,7 @@ const Chat = () => {
  
       // 質問を履歴に追加
       setHistory((prev) => [...prev, { type: "question", text: prompt }]);
-      setHistory((prev) => [...prev, { type: "answer", text: response }]);
+      setHistory((prev) => [...prev, { type: "answer", text: answer }]);
  
       setChoices([
         suggestions.suggestion1,
