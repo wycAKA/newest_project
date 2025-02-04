@@ -23,6 +23,7 @@ const Chat = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null); // スクロールコンテナの参照
   const [imageKey, setImageKey] = useState(""); // 画像の S3 Key を保存
   const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
+  const [sender, setSender] = useState("User"); // 送信者の状態を管理
  
   // スクロール処理
   const scrollToBottom = () => {
@@ -170,7 +171,7 @@ const Chat = () => {
             userId: "yourUserId",
             tokens: 123, // 必要なら適切なトークン数に置き換え
             timeStamp,
-            sender: "User",
+            sender: sender,
             text: prompt,
             img: {
               bucket: "cc2024-prompt-test",
@@ -260,11 +261,19 @@ const Chat = () => {
       setPrompt(""); // 質問欄をリセット
       setActiveChat(res.data.text);
       setIsFirstQuestion(false);
+      setSender("User"); // 送信後はデフォルトに戻す
     } catch (e: any) {
       setError(e.message || "エラーが発生しました。");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // サジェスチョンを選択した場合の処理
+  const handleSuggestionClick = (choice: string) => {
+    setPrompt(choice);
+    setSender("Assistant"); // サジェスチョンは Assistant からの質問とみなす
+    generateAnswer();
   };
  
   // ドロップゾーンの設定
@@ -287,7 +296,7 @@ const Chat = () => {
     accept: {
       "image/*": [] // 画像ファイルを許可
     },
-    maxFiles: 3,
+    maxFiles: 1,
     disabled: isImageUploaded, // 画像がアップロード済みなら無効化
   });
  
