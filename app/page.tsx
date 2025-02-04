@@ -21,6 +21,8 @@ const Chat = () => {
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
   const scrollContainerRef = useRef<HTMLDivElement>(null); // スクロールコンテナの参照
+  const [imageKey, setImageKey] = useState(""); // 画像の S3 Key を保存
+  const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
  
   // スクロール処理
   const scrollToBottom = () => {
@@ -145,8 +147,12 @@ const Chat = () => {
       );
       
 
+
       // 現在のタイムスタンプ
       const timeStamp = new Date().toISOString();
+      // `key` と `url` のデフォルト値をセット
+      const payloadKey = isFirstQuestion ? "" : imageKey;
+      const payloadUrl = isFirstQuestion ? "" : imageUrl;
 
       // バックエンドに送信するデータを構築
       const payload = {
@@ -168,8 +174,8 @@ const Chat = () => {
             text: prompt,
             img: {
               bucket: "cc2024-prompt-test",
-              key: "",
-              url: "",
+              key: isFirstQuestion ? "" : payloadKey, // 初回は空、2回目以降は前回の key
+              url: isFirstQuestion ? "" : payloadUrl, // 初回は空、2回目以降は前回の URL
             },
           },
           model_id: "anthropic.claude-3-5-sonnet-20240620-v1:0",
@@ -220,15 +226,16 @@ const Chat = () => {
       const suggestions = contentText.suggestion_list || {};
 
       // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
-      const key = body.additional_outputs.Output_saveImgToS3.key;
-      const url = body.additional_outputs.Output_saveImgToS3.url;
+      const Key = body.additional_outputs.Output_saveImgToS3.key;
+      const Url = body.additional_outputs.Output_saveImgToS3.url;
 
       console.log("Response:", response);
       console.log("Answer:", answer);
       console.log("Suggestions:", suggestions);
 
       
- 
+      setImageKey(Key);
+      setImageUrl(Url);
       setAnswer(response.answer);
       setChoices([
         suggestions.suggestion1,
