@@ -423,7 +423,28 @@ const Chat = () => {
                 </div>
               )}
  
-              {isLoading && <p>読み込み中...</p>}
+              {isLoading && (
+                <p className="loading-dots">読み込み中
+                  <style jsx>{`
+                    @keyframes blink {
+                      0% { opacity: 0; }
+                      50% { opacity: 1; }
+                      100% { opacity: 0; }
+                    }
+                    .loading-dots span {
+                      animation: blink 1.4s infinite;
+                      opacity: 0;
+                    }
+                    .loading-dots span:nth-child(1) { animation-delay: 0.2s; }
+                    .loading-dots span:nth-child(2) { animation-delay: 0.4s; }
+                    .loading-dots span:nth-child(3) { animation-delay: 0.6s; }
+                  `}</style>
+                  <span>.</span>
+                  <span>.</span>
+                  <span>.</span>
+                </p>
+              )}
+
               {error && <p className="text-red-500">{error}</p>}
             </div>
  
