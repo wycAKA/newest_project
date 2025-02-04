@@ -193,16 +193,35 @@ const Chat = () => {
 
       // レスポンスを出力して確認
       console.log("API Response:", res);
+
+      
  
-      // APIがきちんと設定されている場合
-      // Claudeのレスポンスをパース
-      const parsedContent = JSON.parse(res.data.content[0].text);
-      const response = parsedContent.response;
-      const suggestions = parsedContent.suggestion_list;
+      // `body` を JSON パース
+      const body = JSON.parse(res.data.body);
+      console.log("Parsed Body:", body);
+
+       // `bedrock_response` から `content` を取得
+      const bedrockResponse = body.bedrock_response;
+      if (!bedrockResponse || !bedrockResponse.content || bedrockResponse.content.length === 0) {
+        throw new Error("Invalid API response: content is missing");
+      }
+
+      // `content` の最初の要素の `text` を取得
+      const contentText = bedrockResponse.content[0].text;
+      if (!contentText) {
+        throw new Error("Invalid API response: text is missing");
+      }
+
+       // `response` と `suggestion_list` を取得
+      const response = contentText.response;
+      const answer = response?.answer || "回答が取得できませんでした。";
+      const suggestions = contentText.suggestion_list || {};
 
       console.log("Response:", response);
+      console.log("Answer:", answer);
       console.log("Suggestions:", suggestions);
-      console.log("Parsed Content:", parsedContent);
+
+      
  
       setAnswer(response.answer);
       setChoices([
