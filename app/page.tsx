@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid"; // UUIDライブラリをインポート
+
  
 const Chat = () => {
   const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
@@ -24,11 +25,6 @@ const Chat = () => {
   const [imageKey, setImageKey] = useState(""); // 画像の S3 Key を保存
   const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
   const [sender, setSender] = useState("User"); // 送信者の状態を管理
-  
-  if (typeof window !== "undefined") {
-    const userId = localStorage.getItem("userId");
-    console.log(userId);
-  }
 
  
   // スクロール処理
@@ -37,6 +33,16 @@ const Chat = () => {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }
   };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+        console.log("ユーザーID:", userId);
+        document.getElementById("welcome-message").textContent = `ようこそ, ${userId} さん!`;
+    } else {
+        console.log("ユーザーIDが見つかりません");
+    }
+  });
  
   // 履歴または選択肢が更新されたときにスクロール
   useEffect(() => {
@@ -307,6 +313,8 @@ const Chat = () => {
   });
  
   return (
+    <p id="welcome-message"></p>
+    
     <div className="flex flex-col min-h-screen bg-white">
       {/* ヘッダー */}
       <div
