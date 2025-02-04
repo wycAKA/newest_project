@@ -72,6 +72,8 @@ const Chat = () => {
         ? "https://c4kw81t56e.execute-api.ap-northeast-1.amazonaws.com/dev/invoke"
         : "https://n7gvvahv4a.execute-api.ap-northeast-1.amazonaws.com/dev/invoke";
 
+      console.log("API", apiEndpoint);
+
       // sessionIdを動的に生成
       const sessionId = uuidv4(); 
  
@@ -166,10 +168,8 @@ const Chat = () => {
             text: prompt,
             img: {
               bucket: "cc2024-prompt-test",
-              key: "images/" + encodeURIComponent(uploadedImages[0]?.name || "image.jpg"),
-              url: `https://cc2024-prompt-test.s3.ap-northeast-1.amazonaws.com/images/${encodeURIComponent(
-                uploadedImages[0]?.name || "image.jpg"
-              )}`,
+              key: "",
+              url: "",
             },
           },
           model_id: "anthropic.claude-3-5-sonnet-20240620-v1:0",
@@ -178,6 +178,8 @@ const Chat = () => {
           message_key: "user_prompt/user_message.json",
         },
       };
+
+
 
       // 送信するデータをコンソールで確認
       console.log("Payload to send:", payload);
@@ -216,6 +218,10 @@ const Chat = () => {
       const response = contentText.response;
       const answer = response?.answer || "回答が取得できませんでした。";
       const suggestions = contentText.suggestion_list || {};
+
+      // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
+      const key = body.additional_outputs.Output_saveImgToS3.key;
+      const url = body.additional_outputs.Output_saveImgToS3.url;
 
       console.log("Response:", response);
       console.log("Answer:", answer);
