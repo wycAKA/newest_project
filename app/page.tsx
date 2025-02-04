@@ -24,6 +24,9 @@ const Chat = () => {
   const [imageKey, setImageKey] = useState(""); // 画像の S3 Key を保存
   const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
   const [sender, setSender] = useState("User"); // 送信者の状態を管理
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get("userId");
+  console.log("ユーザーID:", userId);
  
   // スクロール処理
   const scrollToBottom = () => {
