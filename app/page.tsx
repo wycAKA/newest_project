@@ -34,19 +34,17 @@ const Chat = () => {
     }
   };
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-        console.log("ユーザーID:", userId);
-        document.getElementById("welcome-message").textContent = `ようこそ, ${userId} さん!`;
-    } else {
-        console.log("ユーザーIDが見つかりません");
-    }
-  });
  
   // 履歴または選択肢が更新されたときにスクロール
   useEffect(() => {
     scrollToBottom();
+    const userId = localStorage.getItem("userId");
+    const welcomeMessage = document.getElementById("welcome-message");
+    if (welcomeMessage) {
+      if (userId) {
+        welcomeMessage.textContent = `ようこそ, ${userId} さん!`;
+      }
+    }
   }, [history, choices]); // ここで"history"と"choices" を監視
  
   // 画像を削除する関数
