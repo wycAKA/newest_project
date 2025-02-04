@@ -200,11 +200,9 @@ const Chat = () => {
       const response = parsedContent.response;
       const suggestions = parsedContent.suggestion_list;
 
-      console.log("parsedContent", parsedContent);
-
-      console.log("response", response);
-
-      console.log("suggestions", suggestions);
+      console.log("Response:", response);
+      console.log("Suggestions:", suggestions);
+      console.log("Parsed Content:", parsedContent);
  
       setAnswer(response.answer);
       setChoices([
