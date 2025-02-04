@@ -16,8 +16,7 @@ const Chat = () => {
   const [isFirstQuestion, setIsFirstQuestion] = useState(true); // 初回かどうか
   const [firstAnswer, setFirstAnswer] = useState(""); // 最初の回答を保存
   const [firstUploadedImages, setFirstUploadedImages] = useState<File[]>([]); // 最初の画像を保存
-  // 質問と回答と画像を交互に保存
-  const [history, setHistory] = useState<{ type: "question" | "answer" | "image"; text?: string; imageUrl?: string }[]>([]);
+  const [history, setHistory] = useState<{ type: "question" | "answer"; text: string }[]>([]); // 質問と回答を交互に保存
   const [activeChat, setActiveChat] = useState("");
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null); // 音声URLの状態
@@ -237,18 +236,8 @@ const Chat = () => {
       }
  
       // 質問を履歴に追加
-      setHistory((prev) => [
-        ...prev,
-        { type: "question", text: prompt },
-        ...uploadedImages.map((file) => ({
-          type: "image",
-          imageUrl: URL.createObjectURL(file),
-        })),
-        { type: "answer", text: response.answer },
-      ]);
-    } else {
-      setHistory((prev) => [...prev, { type: "question", text: prompt }, { type: "answer", text: response.answer }]);
-    }
+      setHistory((prev) => [...prev, { type: "question", text: prompt }]);
+      setHistory((prev) => [...prev, { type: "answer", text: answer }]);
  
       setChoices([
         suggestions.suggestion1,
@@ -401,22 +390,16 @@ const Chat = () => {
                   key={index}
                   className={`mb-4 p-2 rounded-lg ${
                     entry.type === "question"
-                      ? "self-end bg-green-100 text-green-800 w-[300px] sm:w-[800px]"
-                      : entry.type === "image"
-                      ? "self-start"
+                      ? "self-end bg-green-100 text-green-800 w-[300px] sm:w-[800px]" // smがパソコンの設定
                       : "self-start bg-gray-200 text-gray-800 w-[300px] sm:w-[800px]"
                   }`}
+                  style={{
+                    // maxWidth: "70%", // メッセージの最大幅を調整
+                  }}
                 >
-                  {entry.type === "image" ? (
-                    <img
-                      src={entry.imageUrl}
-                      alt={`Uploaded ${index}`}
-                      className="h-20 w-20 object-cover rounded-md shadow"
-                    />
-                  ) : (
-                    entry.text
-                  )}
-
+                  {entry.text}
+ 
+                  {/* 回答の注意書き */}
                   {entry.type === "answer" && (
                     <p className="mt-2 text-xs text-gray-500">
                       AIによって生成された回答は誤っている可能性があります。
