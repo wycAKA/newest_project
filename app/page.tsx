@@ -34,17 +34,22 @@ const Chat = () => {
     }
   };
 
- 
-  // 履歴または選択肢が更新されたときにスクロール
+  // 代わりにuseEffectを使用
   useEffect(() => {
-    scrollToBottom();
     const userId = localStorage.getItem("userId");
     const welcomeMessage = document.getElementById("welcome-message");
     if (welcomeMessage) {
       if (userId) {
         welcomeMessage.textContent = `ようこそ, ${userId} さん!`;
+      } else {
+        welcomeMessage.textContent = "ようこそゲストさん!";
       }
     }
+  }, []);
+ 
+  // 履歴または選択肢が更新されたときにスクロール
+  useEffect(() => {
+    scrollToBottom();
   }, [history, choices]); // ここで"history"と"choices" を監視
  
   // 画像を削除する関数
