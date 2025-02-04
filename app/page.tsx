@@ -313,32 +313,35 @@ const Chat = () => {
   });
  
   return (
-    <p id="welcome-message"></p>
-    
-    <div className="flex flex-col min-h-screen bg-white">
-      {/* ヘッダー */}
-      <div
-       className="fixed top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-800 text-white z-10"
-       style={{ height: "50px" }} // ヘッダーの高さを指定
-       >
-        <button
-          onClick={() => setIsHistoryVisible(!isHistoryVisible)}
-          className="text-xl font-bold"
+    <div>
+
+      <p id="welcome-message"></p>
+
+      <div className="flex flex-col min-h-screen bg-white">
+        {/* ヘッダー */}
+        <div
+        className="fixed top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-800 text-white z-10"
+        style={{ height: "50px" }} // ヘッダーの高さを指定
         >
-          <img
-            src="/menuicon.png"
-            alt="menu"
-            className="h-6 w-6 max-h-6 max-w-6"
-          />
-        </button>
-        <h1 className="text-lg font-semibold">Art Info</h1>
-        <button onClick={createNewChat}>
-          <img
-            src="/chaticon.png"
-            alt="new chat"
-            className="h-8 w-8 object-contain"
-          />
-        </button>
+          <button
+            onClick={() => setIsHistoryVisible(!isHistoryVisible)}
+            className="text-xl font-bold"
+          >
+            <img
+              src="/menuicon.png"
+              alt="menu"
+              className="h-6 w-6 max-h-6 max-w-6"
+            />
+          </button>
+          <h1 className="text-lg font-semibold">Art Info</h1>
+          <button onClick={createNewChat}>
+            <img
+              src="/chaticon.png"
+              alt="new chat"
+              className="h-8 w-8 object-contain"
+            />
+          </button>
+        </div>
       </div>
  
       <div className="flex flex-col flex-1 mt-[50px]">
