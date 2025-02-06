@@ -26,10 +26,10 @@ const Chat = () => {
   const [imageKey, setImageKey] = useState(""); // 画像の S3 Key を保存
   const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
   const [sender, setSender] = useState("User"); // 送信者の状態を管理
-  
+
   // URL のクエリパラメータから userId を取得
   const searchParams = useSearchParams();
-  const queryUserId = searchParams.get("userId");
+  const userId = searchParams.get("userId");
  
   // スクロール処理
   const scrollToBottom = () => {
