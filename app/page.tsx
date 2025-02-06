@@ -1,12 +1,14 @@
 "use client";
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef, Suspense} from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid"; // UUIDライブラリをインポート
 import { useSearchParams } from 'next/navigation';
 
+
+
  
-const Chat = () => {
+const ChatComponent = () => {
   const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
   const [prompt, setPrompt] = useState(initialQuestion);
   const [answer, setAnswer] = useState("");
@@ -553,4 +555,12 @@ const Chat = () => {
   );
 };
  
-export default Chat;
+//export default Chat;
+// Suspense で ChatComponent をラップしてエクスポートする
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div>Loading Chat...</div>}>
+      <ChatComponent />
+    </Suspense>
+  );
+}
