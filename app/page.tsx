@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid"; // UUIDライブラリをインポート
+import { useSearchParams } from 'next/navigation';
 
  
 const Chat = () => {
@@ -25,10 +26,10 @@ const Chat = () => {
   const [imageKey, setImageKey] = useState(""); // 画像の S3 Key を保存
   const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
   const [sender, setSender] = useState("User"); // 送信者の状態を管理
-
-  // 現在のURLからクエリパラメータを取得
-  const urlParams = new URLSearchParams(window.location.search);
-  const userId = urlParams.get("userId");
+  
+  // URL のクエリパラメータから userId を取得
+  const searchParams = useSearchParams();
+  const queryUserId = searchParams.get("userId");
  
   // スクロール処理
   const scrollToBottom = () => {
