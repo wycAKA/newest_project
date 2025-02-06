@@ -206,7 +206,7 @@ const Chat = () => {
         headers: {
           "Content-Type": "application/json", // 必要に応じて適切なContent-Typeを指定
         },
-        timeout: 30000, // タイムアウトを設定
+        timeout: 50000, // タイムアウトを設定
       });
 
       // レスポンスを出力して確認
@@ -491,7 +491,7 @@ const Chat = () => {
                 >
                   <input {...getInputProps()} />
                   {isImageUploaded ? (
-                    <p className="text-ms font-bold">画像は最大3枚までアップロードされています</p>
+                    <p className="text-ms font-bold">画像は最大1枚までアップロードされています</p>
                   ) : (
                     <p className="text-ms font-bold">
                       画像をドラッグ＆ドロップするか
