@@ -26,6 +26,9 @@ const Chat = () => {
   const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
   const [sender, setSender] = useState("User"); // 送信者の状態を管理
 
+  // 現在のURLからクエリパラメータを取得
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get("userId");
  
   // スクロール処理
   const scrollToBottom = () => {
@@ -51,10 +54,6 @@ const Chat = () => {
   };
 
 
-  if (typeof window !== "undefined") {
-    const userId = localStorage.getItem("userId");
-    console.log(userId);
-  }
  
   // 新しいチャット作成
   const createNewChat = () => {
@@ -177,7 +176,7 @@ const Chat = () => {
             sessionId: sessionId,
             id: "12345678-90ab-cdef-1234-567890abcdef",
             type: "Message",
-            userId: "yourUserId",
+            userId: userId,
             tokens: 123, // 必要なら適切なトークン数に置き換え
             timeStamp,
             sender: sender,
