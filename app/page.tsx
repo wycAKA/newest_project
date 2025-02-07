@@ -242,6 +242,18 @@ const ChatComponent = () => {
       const Key = body.additional_outputs.Output_saveImgToS3.key;
       const Url = body.additional_outputs.Output_saveImgToS3.url;
 
+
+      console.log("Response:", response);
+      console.log("Answer:", answer);
+      console.log("Suggestions:", suggestions);
+
+
+
+      
+      setImageKey(Key);
+      setImageUrl(Url);
+      setAnswer(response.answer);
+
       //音声データを取得//
       if (body.additional_outputs?.FlowOutputNode_4.body) {
         const base64EncodedAudio = body.additional_outputs.FlowOutputNode_4.body;
@@ -257,16 +269,6 @@ const ChatComponent = () => {
         setAudioUrl(audioBlobUrl);
       }
 
-      console.log("Response:", response);
-      console.log("Answer:", answer);
-      console.log("Suggestions:", suggestions);
-
-
-
-      
-      setImageKey(Key);
-      setImageUrl(Url);
-      setAnswer(response.answer);
       setChoices([
         suggestions.suggestion1,
         suggestions.suggestion2,
@@ -460,17 +462,24 @@ const ChatComponent = () => {
                 </div>
               ))}
 
-              {audioUrl && (
-                <div className="flex justify-center mt-4">
-                  <button
-                    onClick={() => {
-                      const audio = new Audio(audioUrl);
-                      audio.play();
-                    }}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
-                  >
-                    音声を再生
-                  </button>
+               {/* 🔥 音声ボタン */}
+               {answer && (
+                <div className="flex flex-col items-center mt-4">
+                  <p className="text-gray-700">回答の音声を再生できます：</p>
+                  
+                  {audioUrl ? (
+                    <button
+                      onClick={() => {
+                        const audio = new Audio(audioUrl);
+                        audio.play();
+                      }}
+                      className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
+                    >
+                      音声を再生
+                    </button>
+                  ) : (
+                    <p className="text-gray-500 text-sm">音声データがありません。</p>
+                  )}
                 </div>
               )}
 
