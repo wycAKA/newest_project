@@ -444,38 +444,38 @@ const ChatComponent = () => {
                   key={index}
                   className={`mb-4 p-2 rounded-lg ${
                     entry.type === "question"
-                      ? "self-end bg-green-100 text-green-800 w-[300px] sm:w-[800px]" // smがパソコンの設定
-                      : "self-start bg-gray-200 text-gray-800 w-[300px] sm:w-[800px]"
+                      ? "self-end bg-green-100 text-green-800 w-[300px] sm:w-[800px]" // 質問のスタイル
+                      : "self-start bg-gray-200 text-gray-800 w-[300px] sm:w-[800px]" // 回答のスタイル
                   }`}
-                  style={{
-                    // maxWidth: "70%", // メッセージの最大幅を調整
-                  }}
                 >
+                  {/* 回答のテキスト */}
                   {entry.text}
 
-                  {audioUrl && (
-                    <div className="flex justify-center mt-4">
-                      <button
-                        onClick={() => {
-                          const audio = new Audio(audioUrl);
-                          audio.play();
-                        }}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
-                      >
-                        音声を再生
-                      </button>
-                    </div>
-                  )}
- 
                   {/* 回答の注意書き */}
                   {entry.type === "answer" && (
-                    <p className="mt-2 text-xs text-gray-500">
-                      AIによって生成された回答は誤っている可能性があります。
-                    </p>
+                    <>
+                      <p className="mt-2 text-xs text-gray-500">
+                        AIによって生成された回答は誤っている可能性があります。
+                      </p>
+
+                      {/* 🔥 音声ボタン（音声がある場合のみ表示） */}
+                      {audioUrl && (
+                        <div className="flex justify-start mt-2">
+                          <button
+                            onClick={() => {
+                              const audio = new Audio(audioUrl);
+                              audio.play();
+                            }}
+                            className="px-3 py-1 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
+                          >
+                            音声を再生
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               ))}
-
               
 
              
