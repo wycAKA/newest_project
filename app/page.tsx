@@ -460,7 +460,7 @@ const ChatComponent = () => {
 
                       {/* 🔥 音声ボタン（音声がある場合のみ表示） */}
                       {audioUrl && (
-                        <div className="flex justify-start mt-2">
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={() => {
                               const audio = new Audio(audioUrl);
@@ -468,7 +468,7 @@ const ChatComponent = () => {
                             }}
                             className="px-3 py-1 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
                           >
-                            音声を再生
+                            🔊
                           </button>
                         </div>
                       )}
