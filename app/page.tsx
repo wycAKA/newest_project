@@ -29,6 +29,7 @@ const ChatComponent = () => {
   const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
   const [sender, setSender] = useState("User"); // 送信者の状態を管理
 
+
   // URL のクエリパラメータから userId を取得
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId");
@@ -241,9 +242,26 @@ const ChatComponent = () => {
       const Key = body.additional_outputs.Output_saveImgToS3.key;
       const Url = body.additional_outputs.Output_saveImgToS3.url;
 
+      //音声データを取得//
+      if (body.additional_outputs?.FlowOutputNode_4.body) {
+        const base64EncodedAudio = body.additional_outputs.FlowOutputNode_4.body;
+        
+        // Base64 をデコードして Blob を作成
+        const audioData = Uint8Array.from(atob(base64EncodedAudio), c => c.charCodeAt(0));
+        const audioBlob = new Blob([audioData], { type: "audio/mp3" });
+
+        // Blob URL を作成
+        const audioBlobUrl = URL.createObjectURL(audioBlob);
+        
+        // 音声 URL をセット
+        setAudioUrl(audioBlobUrl);
+      }
+
       console.log("Response:", response);
       console.log("Answer:", answer);
       console.log("Suggestions:", suggestions);
+
+
 
       
       setImageKey(Key);
@@ -441,6 +459,21 @@ const ChatComponent = () => {
                   )}
                 </div>
               ))}
+
+              {audioUrl && (
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={() => {
+                      const audio = new Audio(audioUrl);
+                      audio.play();
+                    }}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
+                  >
+                    音声を再生
+                  </button>
+                </div>
+              )}
+
              
               {/* 後続質問候補 */}
               {choices.length > 0 && (
