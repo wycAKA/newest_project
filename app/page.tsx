@@ -452,6 +452,20 @@ const ChatComponent = () => {
                   }}
                 >
                   {entry.text}
+
+                  {audioUrl && (
+                    <div className="flex justify-center mt-4">
+                      <button
+                        onClick={() => {
+                          const audio = new Audio(audioUrl);
+                          audio.play();
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
+                      >
+                        音声を再生
+                      </button>
+                    </div>
+                  )}
  
                   {/* 回答の注意書き */}
                   {entry.type === "answer" && (
@@ -462,26 +476,7 @@ const ChatComponent = () => {
                 </div>
               ))}
 
-               {/* 🔥 音声ボタン */}
-               {answer && (
-                <div className="flex flex-col items-center mt-4">
-                  <p className="text-gray-700">回答の音声を再生できます：</p>
-                  
-                  {audioUrl ? (
-                    <button
-                      onClick={() => {
-                        const audio = new Audio(audioUrl);
-                        audio.play();
-                      }}
-                      className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
-                    >
-                      音声を再生
-                    </button>
-                  ) : (
-                    <p className="text-gray-500 text-sm">音声データがありません。</p>
-                  )}
-                </div>
-              )}
+              
 
              
               {/* 後続質問候補 */}
