@@ -271,8 +271,8 @@ const ChatComponent = () => {
       const suggestions = contentText.suggestion_list || {};
 
       // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
-      const Key = body.additional_outputs?.Output_saveImgToS3?.key || "";
-      const Url = body.additional_outputs?.Output_saveImgToS3?.url || "";
+      const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
+      const Url = body.additional_outputs?.Output_saveImgToS3?.url || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.url;
 
 
       console.log("Response:", response);
