@@ -488,7 +488,7 @@ const ChatComponent = () => {
                       {audioUrl && (
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={handleAudioPlayPause(index, audioUrl)}
+                            onClick={() => handleAudioPlayPause(index, audioUrl)} // 無名関数でラップ
                             className={`px-3 py-1 ${audioStates[index]?.isPlaying ? "bg-red-500" : "bg-blue-500"} text-white rounded-md shadow hover:opacity-80 transition`}
                           >
                             {audioStates[index]?.isPlaying  ? "⏹ 停止" : "🔊 再生"}
