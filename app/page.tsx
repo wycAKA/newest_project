@@ -11,7 +11,7 @@ import { useSearchParams } from 'next/navigation';
 const ChatComponent = () => {
   const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
   const [prompt, setPrompt] = useState(initialQuestion);
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState<{ answer: string; explain: string }>({ answer: "", explain: "" });
   const [choices, setChoices] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -152,7 +152,7 @@ const ChatComponent = () => {
         const response = parsedContent.response;
         const suggestions = parsedContent.suggestion_list;
  
-        setAnswer(response.answer);
+        //setAnswer(response.answer);
         setChoices([
           suggestions.suggestion1,
           suggestions.suggestion2,
