@@ -47,24 +47,31 @@ const ChatComponent = () => {
   const handleAudioPlayPause = (index: number, audioUrl: string) => {
     setAudioStates((prev) => {
       const currentAudioState = prev[index] || { audioInstance: null, isPlaying: false };
-
-      if (currentAudioState.audioInstance) {
+  
+      if (currentAudioState.isPlaying) {
         // 停止処理
-        currentAudioState.audioInstance.pause();
-        currentAudioState.audioInstance.currentTime = 0;
+        if (currentAudioState.audioInstance) {
+          currentAudioState.audioInstance.pause();
+          currentAudioState.audioInstance.currentTime = 0; // 再生位置をリセット
+        }
         return { ...prev, [index]: { ...currentAudioState, isPlaying: false } };
       } else {
         // 再生処理
-        const newAudio = new Audio(audioUrl);
+        const newAudio = currentAudioState.audioInstance || new Audio(audioUrl);
         newAudio.play().catch((error) => console.error("Audio playback failed:", error));
+  
         newAudio.onended = () => {
-          // 再生終了時に状態をリセット
-          setAudioStates((prev) => ({ ...prev, [index]: { ...prev[index], isPlaying: false } }));
+          setAudioStates((prev) => ({
+            ...prev,
+            [index]: { ...prev[index], isPlaying: false },
+          }));
         };
+  
         return { ...prev, [index]: { audioInstance: newAudio, isPlaying: true } };
       }
     });
   };
+  
 
  
   // 履歴または選択肢が更新されたときにスクロール
