@@ -259,25 +259,29 @@ const ChatComponent = () => {
         throw new Error("Invalid API response: content is missing");
       }
 
-      // `content` の最初の要素の `text` を取得
-      const content = bedrockResponse.content[0];
+      // `bedrock_response` から `content` を取得
+      const content = bedrockResponse.content[0]; // contentText ではなく content
 
       let response;
+      let suggestions = {};
+
       try {
         if (typeof content.text === "string") {
           // 1回目・2回目のレスポンス（文字列の場合）
-          console.log("contentTextを文字列としてパースします...");
+          console.log("content.textを文字列としてパースします...");
           const parsedContent = JSON.parse(content.text);
           response = parsedContent.response;
+          suggestions = parsedContent.suggestion_list || {};
         } else if (typeof content.text === "object") {
           // 3回目以降のレスポンス（オブジェクトの場合）
-          console.log("contentTextはオブジェクトです。直接パースします...");
+          console.log("content.textはオブジェクトです。直接パースします...");
           response = content.text.response;
+          suggestions = content.text.suggestion_list || {};
         } else {
           throw new Error("content.textの形式が不明です。");
         }
       } catch (error) {
-        console.error("contentTextの解析中にエラーが発生しました:", error);
+        console.error("content.textの解析中にエラーが発生しました:", error);
         response = {
           answer: "回答が取得できませんでした。",
           explain: "説明が提供されていません。",
@@ -288,7 +292,7 @@ const ChatComponent = () => {
        // `response` と `suggestion_list` を取得
       //const response = contentText.response;
       const answer = response?.answer || "回答が取得できませんでした。";
-      const suggestions = contentText.suggestion_list || {};
+      //const suggestions = contentText.suggestion_list || {};
 
       // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
       const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
