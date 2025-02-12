@@ -256,6 +256,9 @@ const ChatComponent = () => {
       if (body.additional_outputs?.FlowOutputNode_4?.audio) {
         const base64EncodedAudio = body.additional_outputs.FlowOutputNode_4.audio;
         
+        //古い音声データをクリアする
+        setAudioUrl(null);
+        
         // Base64 をデコードして Blob を作成
         const audioData = Uint8Array.from(atob(base64EncodedAudio), c => c.charCodeAt(0));
         const audioBlob = new Blob([audioData], { type: "audio/mp3" });
