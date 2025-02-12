@@ -259,16 +259,38 @@ const ChatComponent = () => {
         throw new Error("Invalid API response: content is missing");
       }
 
-      // `content` の最初の要素の `text` を取得
+      // `bedrock_response` から `content` を取得
       const contentText = bedrockResponse.content[0].text;
-      if (!contentText) {
-        throw new Error("Invalid API response: text is missing");
+
+      let response;
+      let suggestions: { suggestion1?: string; suggestion2?: string; suggestion3?: string } = {};
+
+      try {
+        if (body.additional_outputs?.FlowOutputNode_2?.saved_item?.text) {
+          // 3回目以降のレスポンス（FlowOutputNode_2が存在する場合）
+          console.log("FlowOutputNode_2 内のテキストをパースします...");
+          const node2Text = body.additional_outputs.FlowOutputNode_2.saved_item.text;
+          const parsedNode2Content = JSON.parse(node2Text);
+          response = parsedNode2Content.response;
+          suggestions = parsedNode2Content.suggestion_list || {};
+        } else {
+          // 1回目・2回目のレスポンス
+          console.log("1回目・2回目のレスポンスを解析します...");
+          const parsedContent = JSON.parse(contentText);
+          response = parsedContent.response;
+          suggestions = parsedContent.suggestion_list || {};
+        }
+      } catch (error) {
+        console.error("content.textの解析中にエラーが発生しました:", error);
+        response = {
+          answer: "回答が取得できませんでした。",
+          explain: "説明が提供されていません。",
+        };
       }
 
-       // `response` と `suggestion_list` を取得
-      const response = contentText.response;
+      // `answer` を取得
       const answer = response?.answer || "回答が取得できませんでした。";
-      const suggestions = contentText.suggestion_list || {};
+      console.log("取得した回答:", answer);
 
       // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
       const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
@@ -303,10 +325,11 @@ const ChatComponent = () => {
         setAudioUrl(audioBlobUrl);
       }
 
+      // 選択肢をセット
       setChoices([
-        suggestions.suggestion1,
-        suggestions.suggestion2,
-        suggestions.suggestion3,
+        suggestions.suggestion1 || "",
+        suggestions.suggestion2 || "",
+        suggestions.suggestion3 || "",
       ]);
  
       if (isFirstQuestion) {
