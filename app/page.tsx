@@ -170,8 +170,8 @@ const ChatComponent = () => {
       // バックエンドに送信するデータを構築
       const payload = {
         document: {
-          tableName: "log-test",
-          bucketName: "picture-art-storage",
+          tableName: "log-prod",
+          bucketName: "picture-storage-prod",
           folderName: "user-uploads/user-test",
           //folderName: sessionId,
           imageFile: encodedImages[0] || "", // 最初の画像を送信（複数の場合は拡張が必要）
@@ -186,7 +186,7 @@ const ChatComponent = () => {
             sender: sender,
             text: prompt,
             img: {
-              bucket: "cc2024-prompt-test",
+              bucket: "picture-storage-prod",
               key: isFirstQuestion ? "" : payloadKey, // 初回は空、2回目以降は前回の key
               url: isFirstQuestion ? "" : payloadUrl, // 初回は空、2回目以降は前回の URL
             },
