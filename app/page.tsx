@@ -260,32 +260,24 @@ const ChatComponent = () => {
       }
 
       // `content` の最初の要素の `text` を取得
-      const contentText = bedrockResponse.content[0].text;
+      const content = bedrockResponse.content[0];
 
       let response;
       try {
-        if (typeof contentText === "string") {
-          if (contentText.trim().startsWith("{") && contentText.trim().endsWith("}")) {
-            // 1回目・2回目：contentTextがJSON形式の文字列ならそのままパース
-            const parsedContent = JSON.parse(contentText);
-            response = parsedContent.response;
-          } else {
-            // 3回目以降：contentText内のJSON部分を抽出してパース
-            const jsonStart = contentText.lastIndexOf("{");
-            const jsonString = contentText.substring(jsonStart);
-            const parsedContent = JSON.parse(jsonString);
-            response = parsedContent.response;
-          }
+        if (typeof content.text === "string") {
+          // 1回目・2回目のレスポンス（文字列の場合）
+          console.log("contentTextを文字列としてパースします...");
+          const parsedContent = JSON.parse(content.text);
+          response = parsedContent.response;
+        } else if (typeof content.text === "object") {
+          // 3回目以降のレスポンス（オブジェクトの場合）
+          console.log("contentTextはオブジェクトです。直接パースします...");
+          response = content.text.response;
         } else {
-          // contentTextが文字列でない場合は適切に処理
-          console.warn("contentText is not a string. Skipping parsing.");
-          response = {
-            answer: "回答が取得できませんでした。",
-            explain: "説明が提供されていません。",
-          };
+          throw new Error("content.textの形式が不明です。");
         }
       } catch (error) {
-        console.error("Error parsing contentText:", error);
+        console.error("contentTextの解析中にエラーが発生しました:", error);
         response = {
           answer: "回答が取得できませんでした。",
           explain: "説明が提供されていません。",
