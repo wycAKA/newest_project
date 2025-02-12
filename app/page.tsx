@@ -262,6 +262,11 @@ const ChatComponent = () => {
       // `content` の最初の要素の `text` を取得
       const contentText = bedrockResponse.content[0].text;
 
+      if (contentText && typeof contentText === "string") {
+
+        console.log("データ型はjson");
+      }
+
        // `response` と `suggestion_list` を取得
       const response = contentText.response;
       const answer = response?.answer || "回答が取得できませんでした。";
