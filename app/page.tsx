@@ -264,16 +264,25 @@ const ChatComponent = () => {
 
       let response;
       try {
-        if (contentText.trim().startsWith("{") && contentText.trim().endsWith("}")) {
-          // 1回目・2回目：contentTextがJSON形式ならそのままパース
-          const parsedContent = JSON.parse(contentText);
-          response = parsedContent.response;
+        if (typeof contentText === "string") {
+          if (contentText.trim().startsWith("{") && contentText.trim().endsWith("}")) {
+            // 1回目・2回目：contentTextがJSON形式の文字列ならそのままパース
+            const parsedContent = JSON.parse(contentText);
+            response = parsedContent.response;
+          } else {
+            // 3回目以降：contentText内のJSON部分を抽出してパース
+            const jsonStart = contentText.lastIndexOf("{");
+            const jsonString = contentText.substring(jsonStart);
+            const parsedContent = JSON.parse(jsonString);
+            response = parsedContent.response;
+          }
         } else {
-          // 3回目以降：contentText内のJSON部分を抽出してパース
-          const jsonStart = contentText.lastIndexOf("{");
-          const jsonString = contentText.substring(jsonStart);
-          const parsedContent = JSON.parse(jsonString);
-          response = parsedContent.response;
+          // contentTextが文字列でない場合は適切に処理
+          console.warn("contentText is not a string. Skipping parsing.");
+          response = {
+            answer: "回答が取得できませんでした。",
+            explain: "説明が提供されていません。",
+          };
         }
       } catch (error) {
         console.error("Error parsing contentText:", error);
