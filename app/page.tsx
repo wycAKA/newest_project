@@ -285,9 +285,10 @@ const ChatComponent = () => {
       setAnswer(response.answer);
 
       //音声データを取得//
-      if (body.additional_outputs?.FlowOutputNode_4?.audio) {
-        const base64EncodedAudio = body.additional_outputs.FlowOutputNode_4.audio;
 
+      let base64EncodedAudio = body.additional_outputs?.FlowOutputNode_4?.audio || body.additional_outputs?.FlowOutputNode_3?.audio;
+      if (base64EncodedAudio) {
+        
         //古い音声データをクリアする
         setAudioUrl(null);
         
