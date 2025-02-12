@@ -48,9 +48,9 @@ const ChatComponent = () => {
     setAudioStates((prev) => {
       const currentAudioState = prev[index] || { audioInstance: null, isPlaying: false };
 
-      if (currentAudioState.isPlaying) {
+      if (currentAudioState.audioInstance) {
         // 停止処理
-        currentAudioState.audioInstance?.pause();
+        currentAudioState.audioInstance.pause();
         currentAudioState.audioInstance.currentTime = 0;
         return { ...prev, [index]: { ...currentAudioState, isPlaying: false } };
       } else {
