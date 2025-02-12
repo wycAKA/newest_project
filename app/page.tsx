@@ -261,12 +261,31 @@ const ChatComponent = () => {
 
       // `content` の最初の要素の `text` を取得
       const contentText = bedrockResponse.content[0].text;
-      if (!contentText) {
-        throw new Error("Invalid API response: text is missing");
+
+      let response;
+      try {
+        if (contentText.trim().startsWith("{") && contentText.trim().endsWith("}")) {
+          // 1回目・2回目：contentTextがJSON形式ならそのままパース
+          const parsedContent = JSON.parse(contentText);
+          response = parsedContent.response;
+        } else {
+          // 3回目以降：contentText内のJSON部分を抽出してパース
+          const jsonStart = contentText.lastIndexOf("{");
+          const jsonString = contentText.substring(jsonStart);
+          const parsedContent = JSON.parse(jsonString);
+          response = parsedContent.response;
+        }
+      } catch (error) {
+        console.error("Error parsing contentText:", error);
+        response = {
+          answer: "回答が取得できませんでした。",
+          explain: "説明が提供されていません。",
+        };
       }
 
+
        // `response` と `suggestion_list` を取得
-      const response = contentText.response;
+      //const response = contentText.response;
       const answer = response?.answer || "回答が取得できませんでした。";
       const suggestions = contentText.suggestion_list || {};
 
