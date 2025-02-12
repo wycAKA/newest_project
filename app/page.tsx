@@ -247,8 +247,6 @@ const ChatComponent = () => {
       console.log("Answer:", answer);
       console.log("Suggestions:", suggestions);
 
-
-
       
       setImageKey(Key);
       setImageUrl(Url);
