@@ -255,7 +255,7 @@ const ChatComponent = () => {
       //音声データを取得//
       if (body.additional_outputs?.FlowOutputNode_4?.audio) {
         const base64EncodedAudio = body.additional_outputs.FlowOutputNode_4.audio;
-        
+
         //古い音声データをクリアする
         setAudioUrl(null);
         
@@ -297,6 +297,7 @@ const ChatComponent = () => {
     } catch (e: any) {
       setError(e.message || "エラーが発生しました。");
     } finally {
+      setAudioUrl(null)
       setIsLoading(false);
     }
   };
