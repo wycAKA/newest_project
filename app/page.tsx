@@ -94,7 +94,7 @@ const ChatComponent = () => {
   // 新しいチャット作成
   const createNewChat = () => {
     setPrompt(initialQuestion); // 初回の質問に戻す
-    setAnswer(""); // 現在の回答をリセット
+    setAnswer({ answer: "", explain: "" }); // 現在の回答をリセット
     setChoices([]); // 現在の選択肢をリセット
     setError(""); // エラーをリセット
     setUploadedImages([]); // アップロード画像をリセット
