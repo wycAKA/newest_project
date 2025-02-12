@@ -265,15 +265,32 @@ const ChatComponent = () => {
         throw new Error("Invalid API response: text is missing");
       }
 
-       // `response` と `suggestion_list` を取得
-      const response = contentText.response;
-      const answer = response?.answer || "回答が取得できませんでした。";
-      const suggestions = contentText.suggestion_list || {};
+      // `response` と `suggestion_list` を取得
+      let response, ansewer,suggestions;
+      if (isFirstQuestion || history.length === 1) {
+        // **1〜2回目の処理
+        const response = contentText.response;
+        const answer = response?.answer || "回答が取得できませんでした。";
+        const suggestions = contentText.suggestion_list || {};
+      } else {
+        // **3回目以降の処理（`contentText` を再度パース）**
+        let parsedContent;
+        try {
+          parsedContent = JSON.parse(contentText); // `contentText` を JSON パース
+        } catch (error) {
+          console.error("Failed to parse content text as JSON:", error);
+          throw new Error("Failed to parse response content.");
+        }
+        response = parsedContent.response;
+        suggestions = parsedContent.suggestion_list || {};
+      }
 
       // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
       const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
       const Url = body.additional_outputs?.Output_saveImgToS3?.url || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.url;
-
+      // `response` の内容を取得
+      const answer = response?.answer || "回答が取得できませんでした。";
+      const explain = response?.explain || "説明が取得できませんでした。";
 
       console.log("Response:", response);
       console.log("Answer:", answer);
@@ -282,7 +299,7 @@ const ChatComponent = () => {
       
       setImageKey(Key);
       setImageUrl(Url);
-      setAnswer(response.answer);
+      setAnswer({ansewer, explain});
 
       //音声データを取得//
 
