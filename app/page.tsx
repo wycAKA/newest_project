@@ -209,7 +209,7 @@ const ChatComponent = () => {
         headers: {
           "Content-Type": "application/json", // 必要に応じて適切なContent-Typeを指定
         },
-        timeout: 50000, // タイムアウトを設定
+        timeout: 100000, // タイムアウトを設定
       });
 
       // レスポンスを出力して確認
@@ -253,8 +253,8 @@ const ChatComponent = () => {
       setAnswer(response.answer);
 
       //音声データを取得//
-      if (body.additional_outputs?.FlowOutputNode_4.body) {
-        const base64EncodedAudio = body.additional_outputs.FlowOutputNode_4.body;
+      if (body.additional_outputs?.FlowOutputNode_4?.audio) {
+        const base64EncodedAudio = body.additional_outputs.FlowOutputNode_4.audio;
         
         // Base64 をデコードして Blob を作成
         const audioData = Uint8Array.from(atob(base64EncodedAudio), c => c.charCodeAt(0));
