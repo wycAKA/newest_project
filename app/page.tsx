@@ -30,6 +30,7 @@ const ChatComponent = () => {
   const [sender, setSender] = useState("User"); // 送信者の状態を管理
   const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);// 音声制御のための状態を追加
   const [isPlaying, setIsPlaying] = useState(false); // 再生状態を管理
+  const [audioStates, setAudioStates] = useState<Record<number, { audioInstance: HTMLAudioElement | null; isPlaying: boolean }>>({});// 音声状態を複数管理するオブジェクト
 
   // URL のクエリパラメータから userId を取得
   const searchParams = useSearchParams();
@@ -42,25 +43,27 @@ const ChatComponent = () => {
     }
   };
 
-  // 音声再生・停止の関数
-  const handleAudioPlayPause = () => {
-    if (audioUrl) {
-      if (isPlaying && audioInstance) {
-        // 再生中の場合は停止
-        audioInstance.pause();
-        audioInstance.currentTime = 0; // 再生位置をリセット
-        setIsPlaying(false);
+  // 音声再生・停止の関数（index に基づいて制御）
+  const handleAudioPlayPause = (index: number, audioUrl: string) => {
+    setAudioStates((prev) => {
+      const currentAudioState = prev[index] || { audioInstance: null, isPlaying: false };
+
+      if (currentAudioState.isPlaying) {
+        // 停止処理
+        currentAudioState.audioInstance?.pause();
+        currentAudioState.audioInstance.currentTime = 0;
+        return { ...prev, [index]: { ...currentAudioState, isPlaying: false } };
       } else {
-        // 再生中でない場合は再生
+        // 再生処理
         const newAudio = new Audio(audioUrl);
         newAudio.play().catch((error) => console.error("Audio playback failed:", error));
-        setAudioInstance(newAudio);
-        setIsPlaying(true);
-
-        // 再生終了時に状態をリセット
-        newAudio.onended = () => setIsPlaying(false);
+        newAudio.onended = () => {
+          // 再生終了時に状態をリセット
+          setAudioStates((prev) => ({ ...prev, [index]: { ...prev[index], isPlaying: false } }));
+        };
+        return { ...prev, [index]: { audioInstance: newAudio, isPlaying: true } };
       }
-    }
+    });
   };
 
  
@@ -485,10 +488,10 @@ const ChatComponent = () => {
                       {audioUrl && (
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={handleAudioPlayPause}
-                            className={`px-3 py-1 ${isPlaying ? "bg-red-500" : "bg-blue-500"} text-white rounded-md shadow hover:opacity-80 transition`}
+                            onClick={handleAudioPlayPause(index, audioUrl)}
+                            className={`px-3 py-1 ${audioStates[index]?.isPlaying ? "bg-red-500" : "bg-blue-500"} text-white rounded-md shadow hover:opacity-80 transition`}
                           >
-                            {isPlaying ? "⏹ 停止" : "🔊 再生"}
+                            {audioStates[index]?.isPlaying  ? "⏹ 停止" : "🔊 再生"}
                           </button>
                         </div>
                       )}
