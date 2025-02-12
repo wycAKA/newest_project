@@ -261,10 +261,16 @@ const ChatComponent = () => {
 
       // `content` の最初の要素の `text` を取得
       const contentText = bedrockResponse.content[0].text;
-
+      let explain: string = "";
+      let suggestion: { [key: string]: string } = {}; // suggestions をオブジェクト型に変更
       if (contentText && typeof contentText === "string") {
-
-        console.log("データ型はjson");
+        const parsedData = JSON.parse(contentText); 
+        explain = parsedData.response.explain;
+        suggestion = {
+          suggestion1: parsedData.suggestion_list.suggestion1 || "",
+          suggestion2: parsedData.suggestion_list.suggestion2 || "",
+          suggestion3: parsedData.suggestion_list.suggestion3 || "",
+        };
       }
 
        // `response` と `suggestion_list` を取得
@@ -284,7 +290,7 @@ const ChatComponent = () => {
       
       setImageKey(Key);
       setImageUrl(Url);
-      setAnswer(response.answer);
+      setAnswer(explain || response.answer);
 
       //音声データを取得//
 
@@ -305,11 +311,8 @@ const ChatComponent = () => {
         setAudioUrl(audioBlobUrl);
       }
 
-      setChoices([
-        suggestions.suggestion1,
-        suggestions.suggestion2,
-        suggestions.suggestion3,
-      ]);
+      setChoices(suggestion.suggestion1 ? [suggestion.suggestion1, suggestion.suggestion2, suggestion.suggestion3] : [suggestions.suggestion1, suggestions.suggestion2, suggestions.suggestion3]);
+
  
       if (isFirstQuestion) {
         setFirstAnswer(res.data.text); // 最初の回答を保存
@@ -320,11 +323,8 @@ const ChatComponent = () => {
       setHistory((prev) => [...prev, { type: "question", text: prompt }]);
       setHistory((prev) => [...prev, { type: "answer", text: answer }]);
  
-      setChoices([
-        suggestions.suggestion1,
-        suggestions.suggestion2,
-        suggestions.suggestion3,
-      ]);
+      setChoices(suggestion.suggestion1 ? [suggestion.suggestion1, suggestion.suggestion2, suggestion.suggestion3] : [suggestions.suggestion1, suggestions.suggestion2, suggestions.suggestion3]);
+
       setPrompt(""); // 質問欄をリセット
       setActiveChat(res.data.text);
       setIsFirstQuestion(false);
