@@ -342,10 +342,11 @@ const ChatComponent = () => {
       setHistory((prev) => [...prev, { type: "answer", text: answer }]);
  
       setChoices([
-        suggestions.suggestion1,
-        suggestions.suggestion2,
-        suggestions.suggestion3,
+        suggestions?.suggestion1 ?? "",  // ?? 演算子を使って undefined を空文字列に置き換え
+        suggestions?.suggestion2 ?? "",
+        suggestions?.suggestion3 ?? "",
       ]);
+      
       setPrompt(""); // 質問欄をリセット
       setActiveChat(res.data.text);
       setIsFirstQuestion(false);
