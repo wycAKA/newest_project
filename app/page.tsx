@@ -28,7 +28,8 @@ const ChatComponent = () => {
   const [imageKey, setImageKey] = useState(""); // 画像の S3 Key を保存
   const [imageUrl, setImageUrl] = useState(""); // 画像の URL を保存
   const [sender, setSender] = useState("User"); // 送信者の状態を管理
-
+  const [audioInstance, setAudioInstance] = useState<HTMLAudioElement | null>(null);// 音声制御のための状態を追加
+  const [isPlaying, setIsPlaying] = useState(false); // 再生状態を管理
 
   // URL のクエリパラメータから userId を取得
   const searchParams = useSearchParams();
@@ -38,6 +39,27 @@ const ChatComponent = () => {
   const scrollToBottom = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  };
+
+  // 音声再生・停止の関数
+  const handleAudioPlayPause = () => {
+    if (audioUrl) {
+      if (isPlaying && audioInstance) {
+        // 再生中の場合は停止
+        audioInstance.pause();
+        audioInstance.currentTime = 0; // 再生位置をリセット
+        setIsPlaying(false);
+      } else {
+        // 再生中でない場合は再生
+        const newAudio = new Audio(audioUrl);
+        newAudio.play().catch((error) => console.error("Audio playback failed:", error));
+        setAudioInstance(newAudio);
+        setIsPlaying(true);
+
+        // 再生終了時に状態をリセット
+        newAudio.onended = () => setIsPlaying(false);
+      }
     }
   };
 
@@ -297,7 +319,6 @@ const ChatComponent = () => {
     } catch (e: any) {
       setError(e.message || "エラーが発生しました。");
     } finally {
-      setAudioUrl(null)
       setIsLoading(false);
     }
   };
@@ -464,13 +485,10 @@ const ChatComponent = () => {
                       {audioUrl && (
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => {
-                              const audio = new Audio(audioUrl);
-                              audio.play();
-                            }}
-                            className="px-3 py-1 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition"
+                            onClick={handleAudioPlayPause}
+                            className={`px-3 py-1 ${isPlaying ? "bg-red-500" : "bg-blue-500"} text-white rounded-md shadow hover:opacity-80 transition`}
                           >
-                            🔊
+                            {isPlaying ? "⏹ 停止" : "🔊 再生"}
                           </button>
                         </div>
                       )}
