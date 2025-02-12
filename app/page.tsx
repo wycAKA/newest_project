@@ -282,7 +282,7 @@ const ChatComponent = () => {
       
       setImageKey(Key);
       setImageUrl(Url);
-      setAnswer(response.answer,response.explain);
+      setAnswer(response.answer);
 
       //音声データを取得//
 
