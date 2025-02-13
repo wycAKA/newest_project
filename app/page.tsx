@@ -165,10 +165,12 @@ const ChatComponent = () => {
           setFirstAnswer(response.name); // モックデータから回答を保存
           setFirstUploadedImages(uploadedImages); // アップロードされた画像を保存
         }
-        // 質問を履歴に追加
-        setHistory((prev) => [...prev, { type: "question", text: prompt }]);
-        // 回答を履歴に追加
-        setHistory((prev) => [...prev, { type: "answer", text: response.answer }]);
+
+        setHistory((prev) => [
+          ...prev,
+          { type: "question", text: prompt },
+          { type: "answer", text: `${response.answer}\n\n説明: ${response.explain}` }
+        ]);
  
         setChoices([
           suggestions.suggestion1,
@@ -321,8 +323,11 @@ const ChatComponent = () => {
       }
  
       // 質問を履歴に追加
-      setHistory((prev) => [...prev, { type: "question", text: prompt }]);
-      setHistory((prev) => [...prev, { type: "answer", text: answer }]);
+      setHistory((prev) => [
+        ...prev,
+        { type: "question", text: prompt },
+        { type: "answer", text: `${answer}\n\n説明: ${explain}` }
+      ]);
  
       setChoices([
         suggestions.suggestion1,
@@ -479,18 +484,20 @@ const ChatComponent = () => {
               )}
  
               {/* 履歴を表示 */}
+              {/* 履歴を表示 */}
               {history.map((entry, index) => (
-                <div
-                  key={index}
-                  className={`mb-4 p-2 rounded-lg ${
-                    entry.type === "question"
-                      ? "self-end bg-green-100 text-green-800 w-[300px] sm:w-[800px]" // 質問のスタイル
-                      : "self-start bg-gray-200 text-gray-800 w-[300px] sm:w-[800px]" // 回答のスタイル
-                  }`}
-                >
-                  {/* 回答のテキスト */}
+                <div key={index} className={`mb-4 p-2 rounded-lg ${entry.type === "question" ? "self-end bg-green-100" : "self-start bg-gray-200"}`}>
                   {entry.text}
-
+                </div>
+              ))}
+            </div>
+            <div className="p-4 border-t">
+              {/* 🔥 修正⑤: answerとexplainの両方を表示 */}
+              <div className="mb-4">
+                <p><strong>回答:</strong> {answer.answer}</p>
+                <p><strong>説明:</strong> {answer.explain}</p>
+              </div>
+              
                   {/* 回答の注意書き */}
                   {entry.type === "answer" && (
                     <>
