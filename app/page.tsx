@@ -11,7 +11,7 @@ import { useSearchParams } from 'next/navigation';
 const ChatComponent = () => {
   const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
   const [prompt, setPrompt] = useState(initialQuestion);
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState<{ answer: string; explain: string }>({ answer: "", explain: "" });
   const [choices, setChoices] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -154,7 +154,7 @@ const ChatComponent = () => {
         const response = parsedContent.response;
         const suggestions = parsedContent.suggestion_list;
  
-        setAnswer(response.answer);
+        setAnswer({ answer: response.answer, explain: response.explain });
         setChoices([
           suggestions.suggestion1,
           suggestions.suggestion2,
@@ -286,7 +286,7 @@ const ChatComponent = () => {
       
       setImageKey(Key);
       setImageUrl(Url);
-      setAnswer(response.answer);
+      setAnswer({ answer: response.answer, explain: response.explain });
 
       //音声データを取得//
 
@@ -572,7 +572,6 @@ const ChatComponent = () => {
                       <br />
                       クリックして選択してください
                       <br />
-                      （最大3枚まで）
                     </p>
                   )}
                 </div>
