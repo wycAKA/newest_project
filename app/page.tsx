@@ -484,22 +484,17 @@ const ChatComponent = () => {
               )}
  
               {/* 履歴を表示 */}
-              {/* 履歴を表示 */}
               {history.map((entry, index) => (
-                <div key={index} className={`mb-4 p-2 rounded-lg ${entry.type === "question" ? "self-end bg-green-100" : "self-start bg-gray-200"}`}>
+                <div key={index}className={`mb-4 p-2 rounded-lg ${
+                    entry.type === "question"
+                      ? "self-end bg-green-100 text-green-800 w-[300px] sm:w-[800px]" // 質問のスタイル
+                      : "self-start bg-gray-200 text-gray-800 w-[300px] sm:w-[800px]" // 回答のスタイル
+                  }`}
+                >
+                  {/* 回答のテキスト */}
                   {entry.text}
-                </div>
-              ))}
-            </div>
-            <div className="p-4 border-t">
-              {/* 🔥 修正⑤: answerとexplainの両方を表示 */}
-              <div className="mb-4">
-                <p><strong>回答:</strong> {answer.answer}</p>
-                <p><strong>説明:</strong> {answer.explain}</p>
-              </div>
-              
                   {/* 回答の注意書き */}
-                  {entry.type === "answer" && (
+                  {entry.type === "answer" && answer.explain &&(
                     <>
                       <p className="mt-2 text-xs text-gray-500">
                         AIによって生成された回答は誤っている可能性があります。
