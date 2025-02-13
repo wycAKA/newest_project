@@ -104,7 +104,8 @@ const ChatComponent = () => {
     setActiveChat(""); // アクティブなチャットをリセット
     setFirstAnswer(""); // 最初の回答をリセット
     setFirstUploadedImages([]); // 最初の画像をリセット
-    setAudioUrl(null);
+    setAudioUrl(null); // 修正①: 音声URLのリセットを追加
+    setAudioStates({}); // 修正②: 再生状態もリセット
   };
  
   // 回答生成
