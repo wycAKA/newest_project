@@ -94,7 +94,7 @@ const ChatComponent = () => {
   // 新しいチャット作成
   const createNewChat = () => {
     setPrompt(initialQuestion); // 初回の質問に戻す
-    setAnswer(""); // 現在の回答をリセット
+    setAnswer({ answer: "", explain: "" }); // 現在の回答をリセット
     setChoices([]); // 現在の選択肢をリセット
     setError(""); // エラーをリセット
     setUploadedImages([]); // アップロード画像をリセット
@@ -352,7 +352,7 @@ const ChatComponent = () => {
         const newImages = [...uploadedImages, ...acceptedFiles];
         setUploadedImages(newImages);
  
-        if (newImages.length >= 3) {
+        if (newImages.length >= 1) {
           setIsImageUploaded(true); // 画像が3枚登録された
         }
       }
