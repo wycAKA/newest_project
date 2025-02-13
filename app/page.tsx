@@ -272,6 +272,7 @@ const ChatComponent = () => {
        // `response` と `suggestion_list` を取得
       const response = contentText.response;
       const answer = response?.answer || "回答が取得できませんでした。";
+      const explain = response?.explain || "回答が取得できませんでした。";
       const suggestions = contentText.suggestion_list || {};
 
       // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
@@ -281,12 +282,13 @@ const ChatComponent = () => {
       console.log("contentText:", contentText);
       console.log("Response:", response);
       console.log("Answer:", answer);
+      console.log("Explain:", explain)
       console.log("Suggestions:", suggestions);
 
       
       setImageKey(Key);
       setImageUrl(Url);
-      setAnswer({ answer: response.answer, explain: response.explain });
+      setAnswer({ answer: answer, explain: explain });
 
       //音声データを取得//
 
