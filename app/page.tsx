@@ -326,7 +326,7 @@ const ChatComponent = () => {
       setHistory((prev) => [
         ...prev,
         { type: "question", text: prompt },
-        { type: "answer", text: `${answer}\n\n説明: ${explain}` }
+        { type: "answer", text: `${answer}\n\n${explain}` }
       ]);
  
       setChoices([
