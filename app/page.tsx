@@ -275,66 +275,89 @@ const ChatComponent = () => {
       const contentText = bedrockResponse.content[0].text;
 
       if (contentText && typeof contentText === "string") {
-        try {
-          const parsedContent = JSON.parse(contentText); // JSONとしてパースを試みる
-          if (typeof parsedContent === "object") {
-            console.log("データ型はjson");
 
-            // `response` と `suggestion_list` を取得
-            const response = parsedContent.response;
-            const answer = response?.answer || "回答が取得できませんでした。";
-            const explain = response?.explain || "説明が取得できませんでした。";
-            const suggestions = parsedContent.suggestion_list || {};
+        console.log("データ型はjson");
 
-            // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
-            const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
-            const Url = body.additional_outputs?.Output_saveImgToS3?.url || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.url;
-
-            console.log("contentText:", contentText);
-            console.log("Response:", response);
-            console.log("Answer:", answer);
-            console.log("Explain:", explain);
-            console.log("Suggestions:", suggestions);
-
-            setImageKey(Key);
-            setImageUrl(Url);
-            setAnswer({ answer: answer, explain: explain });
-            //音声データを取得//
-
-            let base64EncodedAudio = body.additional_outputs?.FlowOutputNode_4?.audio || body.additional_outputs?.FlowOutputNode_3?.audio;
-            if (base64EncodedAudio) {
-              
-              //古い音声データをクリアする
-              setAudioUrl(null);
-              
-              // Base64 をデコードして Blob を作成
-              const audioData = Uint8Array.from(atob(base64EncodedAudio), c => c.charCodeAt(0));
-              const audioBlob = new Blob([audioData], { type: "audio/mp3" });
-
-              // Blob URL を作成
-              const audioBlobUrl = URL.createObjectURL(audioBlob);
-              
-              // 音声 URL をセット
-              setAudioUrl(audioBlobUrl);
-            }
-          } else {
-            throw new Error("contentText is not a valid object.");
-          }
-        } catch (error) {
-          console.error("Error parsing contentText:", error);
-          setAnswer({
-            answer: "回答が取得できませんでした。時間をおいて再度送信ください。",
-            explain: "",
-          });
-        }
-      } else {
-        console.error("contentText is not a valid JSON string.");
         setAnswer({
           answer: "回答が取得できませんでした。時間をおいて再度送信ください。",
           explain: "",
         });
-      }
+      } else {
 
+        // `response` と `suggestion_list` を取得
+        const response = contentText.response;
+        const answer = response?.answer || "回答が取得できませんでした。";
+        const explain = response?.explain || "回答が取得できませんでした。";
+        const suggestions = contentText.suggestion_list || {};
+
+        // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
+        const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
+        const Url = body.additional_outputs?.Output_saveImgToS3?.url || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.url;
+
+        console.log("contentText:", contentText);
+        console.log("Response:", response);
+        console.log("Answer:", answer);
+        console.log("Explain:", explain)
+        console.log("Suggestions:", suggestions);
+
+        
+        setImageKey(Key);
+        setImageUrl(Url);
+        setAnswer({ answer: answer, explain: explain });
+
+        //音声データを取得//
+
+        let base64EncodedAudio = body.additional_outputs?.FlowOutputNode_4?.audio || body.additional_outputs?.FlowOutputNode_3?.audio;
+        if (base64EncodedAudio) {
+          
+          //古い音声データをクリアする
+          setAudioUrl(null);
+          
+          // Base64 をデコードして Blob を作成
+          const audioData = Uint8Array.from(atob(base64EncodedAudio), c => c.charCodeAt(0));
+          const audioBlob = new Blob([audioData], { type: "audio/mp3" });
+
+          // Blob URL を作成
+          const audioBlobUrl = URL.createObjectURL(audioBlob);
+          
+          // 音声 URL をセット
+          setAudioUrl(audioBlobUrl);
+        }
+
+        setChoices([
+          suggestions.suggestion1,
+          suggestions.suggestion2,
+          suggestions.suggestion3,
+        ]);
+  
+        if (isFirstQuestion) {
+          setFirstAnswer(res.data.text); // 最初の回答を保存
+          setFirstUploadedImages(uploadedImages); // 最初の画像を保存
+        }
+  
+        // 質問を履歴に追加
+        setHistory((prev) => [
+          ...prev,
+          { type: "question", text: prompt },
+          { type: "answer", text: `${answer}\n\n${explain}` }
+        ]);
+  
+        setChoices([
+          suggestions.suggestion1,
+          suggestions.suggestion2,
+          suggestions.suggestion3,
+        ]);
+        setPrompt(""); // 質問欄をリセット
+        setActiveChat(res.data.text);
+        setIsFirstQuestion(false);
+        setSender("User"); // 送信後はデフォルトに戻す
+      }
+    } catch (e: any) {
+      setError(e.message || "エラーが発生しました。");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // サジェスチョンを選択した場合の処理
   const handleSuggestionClick = (choice: string) => {
