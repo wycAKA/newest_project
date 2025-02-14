@@ -287,7 +287,7 @@ const ChatComponent = () => {
         setHistory((prev) => [
           ...prev,
           { type: "question", text: prompt },
-          { type: "answer", text: `${answer}\n\n${explain}` }
+          { type: "answer", text: `${answer}` }
         ]);
       } else {
 
