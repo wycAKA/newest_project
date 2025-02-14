@@ -7,6 +7,32 @@ import { useSearchParams } from 'next/navigation';
 
 
 
+const TooltipButton = ({ onClick, children, tooltipText }: any) => {
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+
+  return (
+    <div className="relative inline-block">
+      <button
+        onClick={onClick}
+        onMouseEnter={() => setIsTooltipVisible(true)}
+        onMouseLeave={() => setIsTooltipVisible(false)}
+        className="relative z-10"
+      >
+        {children}
+      </button>
+      {isTooltipVisible && (
+        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-sm rounded shadow-lg whitespace-nowrap">
+          {tooltipText}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
+
+
  
 const ChatComponent = () => {
   const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
@@ -394,13 +420,13 @@ const ChatComponent = () => {
           />
         </button>
         <h1 className="text-lg font-semibold">Art Info</h1>
-        <button onClick={createNewChat}>
+        <TooltipButton onClick={createNewChat} tooltipText="生成新的 Chat">
           <img
             src="/chaticon.png"
             alt="new chat"
             className="h-8 w-8 object-contain"
           />
-        </button>
+        </TooltipButton>
       </div>
 
  
