@@ -383,7 +383,7 @@ const ChatComponent = () => {
       className="fixed top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-800 text-white z-10"
       style={{ height: "50px" }} // ヘッダーの高さを指定
       >
-        <button
+        {/* <button
           onClick={() => setIsHistoryVisible(!isHistoryVisible)}
           className="text-xl font-bold"
         >
@@ -392,7 +392,7 @@ const ChatComponent = () => {
             alt="menu"
             className="h-6 w-6 max-h-6 max-w-6"
           />
-        </button>
+        </button>*/}
         <h1 className="text-lg font-semibold">Art Info</h1>
         <button onClick={createNewChat}>
           <img
