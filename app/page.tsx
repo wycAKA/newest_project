@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef, Suspense} from "react"
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid"; // UUIDライブラリをインポート
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 
 
@@ -35,6 +35,14 @@ const ChatComponent = () => {
   // URL のクエリパラメータから userId を取得
   const searchParams = useSearchParams();
   const userId = searchParams.get("userId");
+  const router = useRouter(); // routerを初期化
+
+  // userIdの存在を確認し、なければリダイレクトする
+  useEffect(() => {
+    if (!userId) {
+      router.push("https://d1n62yugw7xr12.cloudfront.net"); // リダイレクト処理
+    }
+  }, [userId, router]);
  
   // スクロール処理
   const scrollToBottom = () => {
