@@ -287,7 +287,7 @@ const ChatComponent = () => {
         setHistory((prev) => [
           ...prev,
           { type: "question", text: prompt },
-          { type: "answer", text: `${answer}` }
+          { type: "answer", text: "回答が取得できませんでした。時間をおいて再度送信ください。" }
         ]);
       } else {
 
