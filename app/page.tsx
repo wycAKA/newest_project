@@ -282,6 +282,13 @@ const ChatComponent = () => {
           answer: "回答が取得できませんでした。時間をおいて再度送信ください。",
           explain: "",
         });
+
+        // 質問を履歴に追加
+        setHistory((prev) => [
+          ...prev,
+          { type: "question", text: prompt },
+          { type: "answer", text: `${answer}\n\n${explain}` }
+        ]);
       } else {
 
         // `response` と `suggestion_list` を取得
