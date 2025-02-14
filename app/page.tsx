@@ -7,32 +7,6 @@ import { useSearchParams } from 'next/navigation';
 
 
 
-const TooltipButton = ({ onClick, children, tooltipText }: any) => {
-  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-
-  return (
-    <div className="relative inline-block">
-      <button
-        onClick={onClick}
-        onMouseEnter={() => setIsTooltipVisible(true)}
-        onMouseLeave={() => setIsTooltipVisible(false)}
-        className="relative z-10"
-      >
-        {children}
-      </button>
-      {isTooltipVisible && (
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-sm rounded shadow-lg whitespace-nowrap">
-          {tooltipText}
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-
-
-
  
 const ChatComponent = () => {
   const initialQuestion = "この作品について教えてください。"; // 初回の質問を指定（API作成後削除）
@@ -420,13 +394,13 @@ const ChatComponent = () => {
           />
         </button>
         <h1 className="text-lg font-semibold">Art Info</h1>
-        <TooltipButton onClick={createNewChat} tooltipText="生成新的 Chat">
+        <button onClick={createNewChat}>
           <img
             src="/chaticon.png"
             alt="new chat"
             className="h-8 w-8 object-contain"
           />
-        </TooltipButton>
+        </button>
       </div>
 
  
@@ -639,12 +613,12 @@ const ChatComponent = () => {
                     onClick={generateAnswer}
                     disabled={isLoading || !prompt.trim()} // 入力が空か読み込み中は無効化
                     className={`px-4 py-2 rounded ${
-                      !prompt
+                      isLoading || !prompt.trim()
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-indigo-600 text-white"
                     }`}
                   >
-                    {prompt ? "送信" : "質問を入力してください"}
+                    {isLoading ? "読み込み中..." : prompt ? "送信" : "質問を入力してください"}
                   </button>
                 )}
               </div>
