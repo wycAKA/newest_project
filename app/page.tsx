@@ -279,8 +279,10 @@ const ChatComponent = () => {
         console.log("データ型はjson");
         console.log("contentText:", contentText);
 
+        const answer = body.FlowOutputNode_3.convertedText;
+
         setAnswer({
-          answer: "回答が取得できませんでした。時間をおいて再度送信ください。",
+          answer: answer,
           explain: "",
         });
 
