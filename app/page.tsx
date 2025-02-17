@@ -265,17 +265,22 @@ const ChatComponent = () => {
       const body = JSON.parse(res.data.body);
       console.log("Parsed Body:", body);
 
-      // `content` の最初の要素の `text` を取得
-      const convertedText = body.FlowOutputNode_4.convertedText;
+       // `bedrock_response` から `content` を取得
+      const bedrockResponse = body.bedrock_response;
+      if (!bedrockResponse || !bedrockResponse.content || bedrockResponse.content.length === 0) {
+        throw new Error("Invalid API response: content is missing");
+      }
 
-      if (convertedText && typeof convertedText === "string") {
+      // `content` の最初の要素の `text` を取得
+      const contentText = bedrockResponse.content[0].text;
+
+      if (contentText && typeof contentText === "string") {
 
         console.log("データ型はjson");
-        console.log("contentText:", convertedText);
-
+        console.log("contentText:", contentText);
 
         setAnswer({
-          answer: convertedText,
+          answer: "回答が取得できませんでした。時間をおいて再度送信ください。",
           explain: "",
         });
 
@@ -288,14 +293,17 @@ const ChatComponent = () => {
       } else {
 
         // `response` と `suggestion_list` を取得
-        const answer = body.FlowOutputNode_3.saved_item.text.response.answer || "回答が取得できませんでした。";
-        const explain = body.FlowOutputNode_3.saved_item.text.response.explain  || "回答が取得できませんでした。";
-        const suggestions = body.FlowOutputNode_3.saved_item.text.suggestion_list || {};
+        const response = contentText.response;
+        const answer = response?.answer || "回答が取得できませんでした。";
+        const explain = response?.explain || "回答が取得できませんでした。";
+        const suggestions = contentText.suggestion_list || {};
 
         // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
         const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
         const Url = body.additional_outputs?.Output_saveImgToS3?.url || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.url;
 
+        console.log("contentText:", contentText);
+        console.log("Response:", response);
         console.log("Answer:", answer);
         console.log("Explain:", explain)
         console.log("Suggestions:", suggestions);
