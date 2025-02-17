@@ -279,16 +279,22 @@ const ChatComponent = () => {
         console.log("データ型はjson");
         console.log("contentText:", contentText);
 
+        // contentText を JSON に変換
+        const jsonData = JSON.parse(contentText);
+        const answer = jsonData.response.answer;
+        const explain = jsonData.response.explain;
+        const suggestions = jsonData.suggestion_list|| {}
+
         setAnswer({
-          answer: "回答が取得できませんでした。時間をおいて再度送信ください。",
-          explain: "",
+          answer: answer,
+          explain: explain,
         });
 
         // 質問を履歴に追加
         setHistory((prev) => [
           ...prev,
           { type: "question", text: prompt },
-          { type: "answer", text: "回答が取得できませんでした。時間をおいて再度送信ください。" }
+          { type: "answer", text: `${answer}\n\n${explain}` }
         ]);
       } else {
 
