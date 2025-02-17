@@ -277,6 +277,7 @@ const ChatComponent = () => {
       if (contentText && typeof contentText === "string") {
 
         console.log("データ型はjson");
+        console.log("contentText:", contentText);
 
         setAnswer({
           answer: "回答が取得できませんでした。時間をおいて再度送信ください。",
