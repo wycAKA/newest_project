@@ -266,23 +266,22 @@ const ChatComponent = () => {
       console.log("Parsed Body:", body);
 
        // `bedrock_response` から `content` を取得
-      const bedrockResponse = body.bedrock_response;
-      if (!bedrockResponse || !bedrockResponse.content || bedrockResponse.content.length === 0) {
-        throw new Error("Invalid API response: content is missing");
+      const text = body.FlowOutputNode_3.saved_item.text;
+      if (!text || !text.content || text.content.length === 0) {
+        throw new Error("Invalid API text: content is missing");
       }
 
       // `content` の最初の要素の `text` を取得
-      const contentText = bedrockResponse.content[0].text;
+      const convertedText = body.FlowOutputNode_4.convertedText;
 
-      if (contentText && typeof contentText === "string") {
+      if (convertedText && typeof convertedText === "string") {
 
         console.log("データ型はjson");
-        console.log("contentText:", contentText);
+        console.log("contentText:", convertedText);
 
-        const answer = body.FlowOutputNode_3.convertedText;
 
         setAnswer({
-          answer: answer,
+          answer: convertedText,
           explain: "",
         });
 
@@ -295,17 +294,14 @@ const ChatComponent = () => {
       } else {
 
         // `response` と `suggestion_list` を取得
-        const response = contentText.response;
-        const answer = response?.answer || "回答が取得できませんでした。";
-        const explain = response?.explain || "回答が取得できませんでした。";
-        const suggestions = contentText.suggestion_list || {};
+        const answer = text?.response.answer || "回答が取得できませんでした。";
+        const explain = text?.response.explain || "回答が取得できませんでした。";
+        const suggestions = text.suggestion_list || {};
 
         // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
         const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
         const Url = body.additional_outputs?.Output_saveImgToS3?.url || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.url;
 
-        console.log("contentText:", contentText);
-        console.log("Response:", response);
         console.log("Answer:", answer);
         console.log("Explain:", explain)
         console.log("Suggestions:", suggestions);
