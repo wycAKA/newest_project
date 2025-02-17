@@ -263,7 +263,7 @@ const ChatComponent = () => {
  
       // `body` を JSON パース
       const body = JSON.parse(res.data.body);
-      //console.log("Parsed Body:", body);
+      console.log("Parsed Body:", body);
 
        // `bedrock_response` から `content` を取得
       const bedrockResponse = body.bedrock_response;
@@ -313,7 +313,6 @@ const ChatComponent = () => {
         setAnswer({ answer: answer, explain: explain });
 
         //音声データを取得//
-
         let base64EncodedAudio = body.additional_outputs?.FlowOutputNode_4?.audio || body.additional_outputs?.FlowOutputNode_3?.audio;
         if (base64EncodedAudio) {
           
