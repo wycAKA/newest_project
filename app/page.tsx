@@ -265,12 +265,6 @@ const ChatComponent = () => {
       const body = JSON.parse(res.data.body);
       console.log("Parsed Body:", body);
 
-       // `bedrock_response` から `content` を取得
-      const text = body.FlowOutputNode_3.saved_item.text;
-      if (!text || !text.content || text.content.length === 0) {
-        throw new Error("Invalid API text: content is missing");
-      }
-
       // `content` の最初の要素の `text` を取得
       const convertedText = body.FlowOutputNode_4.convertedText;
 
@@ -294,9 +288,9 @@ const ChatComponent = () => {
       } else {
 
         // `response` と `suggestion_list` を取得
-        const answer = text?.response.answer || "回答が取得できませんでした。";
-        const explain = text?.response.explain || "回答が取得できませんでした。";
-        const suggestions = text.suggestion_list || {};
+        const answer = body.FlowOutputNode_3.saved_item.text.response.answer || "回答が取得できませんでした。";
+        const explain = body.FlowOutputNode_3.saved_item.text.response.explain  || "回答が取得できませんでした。";
+        const suggestions = body.FlowOutputNode_3.saved_item.text.suggestion_list || {};
 
         // `additional_outputs` の `Output_saveImgToS3` から `key` と `url` を取得
         const Key = body.additional_outputs?.Output_saveImgToS3?.key || body.additional_outputs?.FlowOutputNode_2?.saved_item?.img.key;
