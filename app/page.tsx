@@ -622,18 +622,17 @@ const ChatComponent = () => {
                   <button
                     onClick={generateAnswer}
                     disabled={
-                      isFirstQuestion || // 初回送信時は無効
-                      uploadedImages.length === 0 || // 画像が必須
-                      isLoading || 
-                      !prompt.trim() // 入力が空
+                      isFirstQuestion || uploadedImages.length === 0 // 初回は画像が必須
+                        ? true
+                        : isLoading || !prompt.trim() // 入力が空または読み込み中の場合も無効化
                     }
                     className={`px-4 py-2 rounded ${
-                      isFirstQuestion || uploadedImages.length === 0
+                      uploadedImages.length === 0
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-indigo-600 text-white"
                     }`}
                   >
-                    {isFirstQuestion || uploadedImages.length === 0 ? "画像をアップロードしてください" : "送信"}
+                    {uploadedImages.length === 0 ? "画像をアップロードしてください" : "送信"}
                   </button>
                 ) : (
                   // 2回目以降の送信ボタン
