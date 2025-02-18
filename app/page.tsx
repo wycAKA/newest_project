@@ -425,6 +425,7 @@ const ChatComponent = () => {
           <img
             src="/chaticon.png"
             alt="new chat"
+            title="新規に会話を始める"
             className="h-8 w-8 object-contain"
           />
         </button>
