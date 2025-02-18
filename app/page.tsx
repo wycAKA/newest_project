@@ -623,7 +623,7 @@ const ChatComponent = () => {
                   <button
                     onClick={generateAnswer}
                     disabled={
-                      isFirstQuestion || uploadedImages.length === 0 // 初回は画像が必須
+                      isFirstQuestion && uploadedImages.length === 0 // 初回は画像が必須
                         ? true
                         : isLoading || !prompt.trim() // 入力が空または読み込み中の場合も無効化
                     }
